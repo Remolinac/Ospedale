@@ -3,10 +3,22 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Jefferson/Ospedale/src/packagee/NewJFrame.java</file>
-            <file>file:/C:/Jefferson/Ospedale/src/packagee/NewJFrame1.java</file>
-            <file>file:/C:/Jefferson/Ospedale/src/packagee/NewJFrame11.java</file>
-            <file>file:/C:/Jefferson/Ospedale/src/packagee/NewJFrame111.java</file>
+            <file>file:/C:/Users/berri/Downloads/UN/Semestre%203/POO/Ospedale/src/packagee/model/Administrator.java</file>
+            <file>file:/C:/Users/berri/Downloads/UN/Semestre%203/POO/Ospedale/src/packagee/model/Appointment.java</file>
+            <file>file:/C:/Users/berri/Downloads/UN/Semestre%203/POO/Ospedale/src/packagee/model/AppointmentStatus.java</file>
+            <file>file:/C:/Users/berri/Downloads/UN/Semestre%203/POO/Ospedale/src/packagee/model/Doctor.java</file>
+            <file>file:/C:/Users/berri/Downloads/UN/Semestre%203/POO/Ospedale/src/packagee/model/Hospitalization.java</file>
+            <file>file:/C:/Users/berri/Downloads/UN/Semestre%203/POO/Ospedale/src/packagee/model/HospitalizationStatus.java</file>
+            <file>file:/C:/Users/berri/Downloads/UN/Semestre%203/POO/Ospedale/src/packagee/model/Patient.java</file>
+            <file>file:/C:/Users/berri/Downloads/UN/Semestre%203/POO/Ospedale/src/packagee/model/RoomType.java</file>
+            <file>file:/C:/Users/berri/Downloads/UN/Semestre%203/POO/Ospedale/src/packagee/model/Specialty.java</file>
+            <file>file:/C:/Users/berri/Downloads/UN/Semestre%203/POO/Ospedale/src/packagee/model/User.java</file>
+            <file>file:/C:/Users/berri/Downloads/UN/Semestre%203/POO/Ospedale/src/packagee/model/prescription.java</file>
+            <file>file:/C:/Users/berri/Downloads/UN/Semestre%203/POO/Ospedale/src/packagee/view/AdminView.java</file>
+            <file>file:/C:/Users/berri/Downloads/UN/Semestre%203/POO/Ospedale/src/packagee/view/DoctorView.java</file>
+            <file>file:/C:/Users/berri/Downloads/UN/Semestre%203/POO/Ospedale/src/packagee/view/LoginView.java</file>
+            <file>file:/C:/Users/berri/Downloads/UN/Semestre%203/POO/Ospedale/src/packagee/view/PanelRound.java</file>
+            <file>file:/C:/Users/berri/Downloads/UN/Semestre%203/POO/Ospedale/src/packagee/view/PatientView.java</file>
         </group>
     </open-files>
 </project-private>
