@@ -4,8 +4,6 @@
  */
 package packagee.model;
 
-import packagee.model.Appointment;
-
 /**
  *
  * @author jjlora

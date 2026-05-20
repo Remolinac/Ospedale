@@ -6,12 +6,13 @@ package packagee.model;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
  * @author edangulo
  */
-public class Appointment {
+public class Appointment implements ISerializable{
     
     private final String id;
     private Patient patient;
@@ -93,6 +94,23 @@ public class Appointment {
 
     public boolean addPrescription(Prescription prescrip) {
         return this.prescriptions.add(prescrip);
+    }
+
+    @Override
+    public HashMap<String, Object> serialize() {
+        HashMap<String, Object> serializedData = new HashMap<>();
+        
+        serializedData.put("id", this.id);
+        serializedData.put("patient", this.patient);
+        serializedData.put("doctor", this.doctor);
+        serializedData.put("specialty", this.specialty);
+        serializedData.put("datetime", this.datetime);
+        serializedData.put("reason", this.reason);
+        serializedData.put("type", this.type);
+        serializedData.put("status", this.status);
+        serializedData.put("prescriptions", this.prescriptions);
+        
+        return serializedData;
     }
     
 }

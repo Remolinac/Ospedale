@@ -4,17 +4,15 @@
  */
 package packagee.model;
 
-import packagee.model.Hospitalization;
-import packagee.model.Appointment;
-import packagee.model.User;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
  * @author edangulo
  */
-public class Patient extends User {
+public class Patient extends User implements ISerializable {
     
     private String email;
     private LocalDate birthdate;
@@ -64,6 +62,33 @@ public class Patient extends User {
         this.phone = phone;
         this.address = address;
         this.appointments = new ArrayList<>();
+    }
+
+    @Override
+    public HashMap<String, Object> serialize() {
+        HashMap<String, Object> serializedData = new HashMap<>();
+        
+        serializedData.put("id", this.id);
+        serializedData.put("username", this.username);
+        serializedData.put("firstname", this.firstname);
+        serializedData.put("lastname", this.lastname);
+        serializedData.put("password", this.password);
+        serializedData.put("email", this.email);
+        serializedData.put("birthdate", this.birthdate);
+        serializedData.put("gender", this.gender);
+        serializedData.put("phone", this.phone);
+        serializedData.put("address", this.address);
+        serializedData.put("hospitalizationId",this.hospitalization != null ? this.hospitalization.getId(): null);
+        
+        ArrayList<HashMap<String, Object>> serializedAppointments = new ArrayList<>();
+        
+        for (Appointment a : this.appointments) {
+        serializedAppointments.add(a.serialize());
+         }
+        
+        serializedData.put("appointments", serializedAppointments);
+        
+        return serializedData;
     }
     
 }

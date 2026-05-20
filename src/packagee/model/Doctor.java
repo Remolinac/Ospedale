@@ -7,12 +7,13 @@ package packagee.model;
 import packagee.model.Appointment;
 import packagee.model.User;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
  * @author edangulo
  */
-public class Doctor extends User {
+public class Doctor extends User implements ISerializable{
     
     private Specialty specialty;
     private String licenceNumber;
@@ -35,7 +36,20 @@ public class Doctor extends User {
     public Specialty getSpecialty() {
         return specialty;
     }
+
+    public String getLicenceNumber() {
+        return licenceNumber;
+    }
+
+    public String getAssignedOffice() {
+        return assignedOffice;
+    }
+
+    public ArrayList<Hospitalization> getHospitalizations() {
+        return hospitalizations;
+    }
     
+    //Revisar
     public boolean addHospitalization(Hospitalization hosp){
         return hospitalizations.add(hosp);
     }
@@ -51,4 +65,22 @@ public class Doctor extends User {
     public void setAssignedOffice(String assignedOffice) {
         this.assignedOffice = assignedOffice;
     }
+
+    @Override
+    public HashMap<String, Object> serialize() {
+      HashMap<String, Object> serializedData = new HashMap<>();
+        
+        serializedData.put("id", this.id);
+        serializedData.put("username", this.username);
+        serializedData.put("firstname", this.firstname);
+        serializedData.put("lastname", this.lastname);
+        serializedData.put("password", this.password);
+        serializedData.put("specialty", this.specialty);
+        serializedData.put("licenceNumber", this.licenceNumber);
+        serializedData.put("assignedOffice", this.assignedOffice);
+        
+        return serializedData;
+    }
+    
+    
 }
