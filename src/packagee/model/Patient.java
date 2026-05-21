@@ -49,8 +49,23 @@ public class Patient extends User implements ISerializable {
     public ArrayList<Appointment> getAppointments() {
         return appointments;
     }
-    
-    
+
+    public String getEmail() {
+        return email;
+    }
+
+    public long getPhone() {
+        return phone;
+    }
+
+    public LocalDate getBirthdate() {
+        return birthdate;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
     public void addAppointment(Appointment a) {
         this.appointments.add(a);
     }
