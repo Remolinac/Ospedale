@@ -45,7 +45,7 @@ public class DoctorController {
         if (storage.getDoctor(Long.parseLong(id)) != null) {
             return new Response(false, "Ya existe un doctor con ese ID", null);
         }
-        if (storage.existsByUsername(username)) {
+        if (storage.existsByUsername(username) || storage.existsByUsernameInDoctors(username)) {
             return new Response(false, "El nombre de usuario ya está en uso", null);
         }
 
@@ -95,7 +95,7 @@ public class DoctorController {
             return new Response(false, "No existe un doctor con ese ID", null);
         }
 
-        if (!doctor.getUsername().equals(username) && storage.existsByUsername(username)) {
+        if (!doctor.getUsername().equals(username) && (storage.existsByUsername(username) || storage.existsByUsernameInDoctors(username))) {
             return new Response(false, "El nombre de usuario ya está en uso", null);
         }
 

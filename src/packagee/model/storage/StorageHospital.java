@@ -79,7 +79,16 @@ public class StorageHospital {
     public boolean existsByUsername(String username) {
         return this.storagePatient.existsByUsername(username);
     }
-    
+
+    public boolean existsByUsernameInDoctors(String username) {
+        for (Doctor doctor : this.storageDoctor.getAllDoctors().values()) {
+            if (doctor.getUsername().equalsIgnoreCase(username)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     //Métodos para citas 
     public boolean addAppointment(Appointment appointment) {
         return this.storageAppointment.addAppointment(appointment);
@@ -134,3 +143,5 @@ public class StorageHospital {
     }
 
 }
+
+
