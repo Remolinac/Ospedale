@@ -24,6 +24,15 @@ public class Appointment implements ISerializable{
     public void setReason(String reason) {
         this.reason = reason;
     }
+
+    public void setDatetime(LocalDateTime datetime) {
+        this.datetime = datetime;
+    }
+
+    public String getReason() {
+        return this.reason;
+    }
+
     private boolean type;
     private ArrayList<Prescription> prescriptions;
     private AppointmentStatus status;

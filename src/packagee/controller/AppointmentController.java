@@ -4,6 +4,19 @@
  */
 package packagee.controller;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import packagee.model.Appointment;
+import packagee.model.AppointmentStatus;
+import packagee.model.Doctor;
+import packagee.model.Patient;
+import packagee.model.Prescription;
+import packagee.model.Specialty;
+import packagee.model.storage.StorageHospital;
 import packagee.util.Response;
 import packagee.util.Validator;
 
@@ -27,14 +40,32 @@ public class AppointmentController {
             return new Response(false, "La razón de la cita no puede estar vacía", null);
         }
 
-        // TODO: buscar paciente por patientId en Hospital
-        // TODO: buscar doctor por doctorId en Hospital
-        // TODO: verificar que el doctor tenga disponibilidad en esa fecha y hora
-        // TODO: la especialidad de la cita debe ser la especialidad del doctor
-        // TODO: generar ID automático formato A-{patientId}-NNNN
-        // TODO: crear objeto Appointment y guardarlo
+        StorageHospital storage = StorageHospital.getInstance();
 
-        return new Response(true, "Cita solicitada correctamente", null);
+        Patient patient = storage.getPatient(Long.parseLong(patientId));
+        if (patient == null) {
+            return new Response(false, "No existe un paciente con ese ID", null);
+        }
+
+        Doctor doctor = storage.getDoctor(Long.parseLong(doctorId));
+        if (doctor == null) {
+            return new Response(false, "No existe un doctor con ese ID", null);
+        }
+
+        LocalDate localDate = LocalDate.parse(date);
+        LocalTime localTime = LocalTime.parse(time);
+        LocalDateTime datetime = LocalDateTime.of(localDate, localTime);
+
+        if (!doctor.isAvailable(localDate)) {
+            return new Response(false, "El doctor no tiene disponibilidad en ese horario", null);
+        }
+
+        Appointment appointment = new Appointment(
+                patient, doctor, doctor.getSpecialty(), datetime, reason, true
+        );
+
+        storage.addAppointment(appointment);
+        return new Response(true, "Cita solicitada correctamente", appointment.serialize());
     }
 
     public Response requestAppointmentBySpecialty(String patientId, String specialty,
@@ -53,13 +84,35 @@ public class AppointmentController {
             return new Response(false, "La especialidad no puede estar vacía", null);
         }
 
-        // TODO: buscar paciente por patientId en Hospital
-        // TODO: buscar doctor disponible con esa especialidad en esa fecha y hora
-        // TODO: si no hay doctor disponible retornar Response(false, ...)
-        // TODO: generar ID automático formato A-{patientId}-NNNN
-        // TODO: crear objeto Appointment y guardarlo
+        Specialty specialtyEnum;
+        try {
+            specialtyEnum = Specialty.valueOf(specialty.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return new Response(false, "La especialidad no es válida", null);
+        }
 
-        return new Response(true, "Cita solicitada correctamente", null);
+        StorageHospital storage = StorageHospital.getInstance();
+
+        Patient patient = storage.getPatient(Long.parseLong(patientId));
+        if (patient == null) {
+            return new Response(false, "No existe un paciente con ese ID", null);
+        }
+
+        LocalDate localDate = LocalDate.parse(date);
+        Doctor doctor = storage.getAvailableDoctorBySpecialty(specialtyEnum, localDate);
+        if (doctor == null) {
+            return new Response(false, "No hay doctores disponibles con esa especialidad en el horario solicitado", null);
+        }
+
+        LocalTime localTime = LocalTime.parse(time);
+        LocalDateTime datetime = LocalDateTime.of(localDate, localTime);
+
+        Appointment appointment = new Appointment(
+                patient, doctor, specialtyEnum, datetime, reason, false
+        );
+
+        storage.addAppointment(appointment);
+        return new Response(true, "Cita solicitada correctamente", appointment.serialize());
     }
 
     public Response acceptAppointment(String appointmentId, String doctorId) {
@@ -68,12 +121,18 @@ public class AppointmentController {
             return new Response(false, "El ID de la cita no puede estar vacío", null);
         }
 
-        // TODO: buscar cita por appointmentId en Hospital
-        // TODO: verificar que la cita esté en estado REQUESTED
-        // TODO: cambiar estado a PENDING
-        // TODO: appointment.setStatus(AppointmentStatus.PENDING)
+        StorageHospital storage = StorageHospital.getInstance();
 
-        return new Response(true, "Cita aceptada correctamente", null);
+        Appointment appointment = storage.getAppointment(appointmentId);
+        if (appointment == null) {
+            return new Response(false, "No existe una cita con ese ID", null);
+        }
+        if (appointment.getStatus() != AppointmentStatus.REQUESTED) {
+            return new Response(false, "La cita debe estar en estado REQUESTED para ser aceptada", null);
+        }
+
+        appointment.setStatus(AppointmentStatus.PENDING);
+        return new Response(true, "Cita aceptada correctamente", appointment.serialize());
     }
 
     public Response completeAppointment(String appointmentId, String doctorId) {
@@ -82,12 +141,18 @@ public class AppointmentController {
             return new Response(false, "El ID de la cita no puede estar vacío", null);
         }
 
-        // TODO: buscar cita por appointmentId en Hospital
-        // TODO: verificar que la cita esté en estado PENDING
-        // TODO: cambiar estado a COMPLETED
-        // TODO: appointment.setStatus(AppointmentStatus.COMPLETED)
+        StorageHospital storage = StorageHospital.getInstance();
 
-        return new Response(true, "Cita completada correctamente", null);
+        Appointment appointment = storage.getAppointment(appointmentId);
+        if (appointment == null) {
+            return new Response(false, "No existe una cita con ese ID", null);
+        }
+        if (appointment.getStatus() != AppointmentStatus.PENDING) {
+            return new Response(false, "La cita debe estar en estado PENDING para ser completada", null);
+        }
+
+        appointment.setStatus(AppointmentStatus.COMPLETED);
+        return new Response(true, "Cita completada correctamente", appointment.serialize());
     }
 
     public Response cancelAppointment(String appointmentId, String patientId) {
@@ -96,12 +161,18 @@ public class AppointmentController {
             return new Response(false, "El ID de la cita no puede estar vacío", null);
         }
 
-        // TODO: buscar cita por appointmentId en Hospital
-        // TODO: verificar que la cita NO esté en estado COMPLETED
-        // TODO: cambiar estado a CANCELED
-        // TODO: appointment.setStatus(AppointmentStatus.CANCELED)
+        StorageHospital storage = StorageHospital.getInstance();
 
-        return new Response(true, "Cita cancelada correctamente", null);
+        Appointment appointment = storage.getAppointment(appointmentId);
+        if (appointment == null) {
+            return new Response(false, "No existe una cita con ese ID", null);
+        }
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
+            return new Response(false, "No se puede cancelar una cita ya completada", null);
+        }
+
+        appointment.setStatus(AppointmentStatus.CANCELED);
+        return new Response(true, "Cita cancelada correctamente", appointment.serialize());
     }
 
     public Response rescheduleAppointment(String appointmentId, String doctorId,
@@ -114,12 +185,22 @@ public class AppointmentController {
             return new Response(false, "La nueva hora no es válida, use formato hh:mm y minutos en 00, 15, 30 o 45", null);
         }
 
-        // TODO: buscar cita por appointmentId en Hospital
-        // TODO: verificar que la cita sea válida
-        // TODO: actualizar la hora (misma fecha, nueva hora)
-        // TODO: añadir rescheduleReason a la razón original de la cita
+        StorageHospital storage = StorageHospital.getInstance();
 
-        return new Response(true, "Cita reagendada correctamente", null);
+        Appointment appointment = storage.getAppointment(appointmentId);
+        if (appointment == null) {
+            return new Response(false, "No existe una cita con ese ID", null);
+        }
+
+        LocalDate sameDate = appointment.getDatetime().toLocalDate();
+        LocalTime newLocalTime = LocalTime.parse(newTime);
+        appointment.setDatetime(LocalDateTime.of(sameDate, newLocalTime));
+
+        if (rescheduleReason != null && !rescheduleReason.trim().isEmpty()) {
+            appointment.setReason(appointment.getReason() + " | Reagendado: " + rescheduleReason);
+        }
+
+        return new Response(true, "Cita reagendada correctamente", appointment.serialize());
     }
 
     public Response prescribeMedication(String appointmentId, String doctorId,
@@ -133,11 +214,20 @@ public class AppointmentController {
             return new Response(false, "El nombre del medicamento no puede estar vacío", null);
         }
 
-        // TODO: buscar cita por appointmentId en Hospital
-        // TODO: verificar que la cita esté en estado PENDING (no COMPLETED ni CANCELED)
-        // TODO: crear objeto Prescription y asociarlo a la cita
+        StorageHospital storage = StorageHospital.getInstance();
 
-        return new Response(true, "Medicamento prescrito correctamente", null);
+        Appointment appointment = storage.getAppointment(appointmentId);
+        if (appointment == null) {
+            return new Response(false, "No existe una cita con ese ID", null);
+        }
+        if (appointment.getStatus() != AppointmentStatus.PENDING) {
+            return new Response(false, "Solo se pueden prescribir medicamentos en citas en estado PENDING", null);
+        }
+
+        new Prescription(appointment, medicationName, dose, administrationRoute,
+                treatmentDuration, additionalInstructions, frequency);
+
+        return new Response(true, "Medicamento prescrito correctamente", appointment.serialize());
     }
 
     public Response getPatientAppointments(String patientId) {
@@ -146,12 +236,21 @@ public class AppointmentController {
             return new Response(false, "El ID del paciente no puede estar vacío", null);
         }
 
-        // TODO: buscar paciente por patientId en Hospital
-        // TODO: obtener lista de citas ordenadas descendentemente por fecha y hora
-        // TODO: serializar cada cita como Map<String, Object> — NUNCA pasar objeto Appointment
-        // TODO: return new Response(true, "Citas obtenidas", listaSerializada)
+        StorageHospital storage = StorageHospital.getInstance();
 
-        return new Response(true, "Citas obtenidas correctamente", null);
+        Patient patient = storage.getPatient(Long.parseLong(patientId));
+        if (patient == null) {
+            return new Response(false, "No existe un paciente con ese ID", null);
+        }
+
+        List<Appointment> appointments = storage.getSortedAppointmentsForPatient(Long.parseLong(patientId));
+
+        ArrayList<HashMap<String, Object>> serialized = new ArrayList<>();
+        for (Appointment a : appointments) {
+            serialized.add(a.serialize());
+        }
+
+        return new Response(true, "Citas obtenidas correctamente", serialized);
     }
 
     public Response getDoctorAppointments(String doctorId, boolean pendingOnly) {
@@ -160,12 +259,20 @@ public class AppointmentController {
             return new Response(false, "El ID del doctor no puede estar vacío", null);
         }
 
-        // TODO: buscar doctor por doctorId en Hospital
-        // TODO: obtener lista de citas, si pendingOnly filtrar solo PENDING
-        // TODO: ordenar descendentemente por fecha y hora
-        // TODO: serializar cada cita como Map<String, Object> — NUNCA pasar objeto Appointment
-        // TODO: return new Response(true, "Citas obtenidas", listaSerializada)
+        StorageHospital storage = StorageHospital.getInstance();
 
-        return new Response(true, "Citas obtenidas correctamente", null);
+        Doctor doctor = storage.getDoctor(Long.parseLong(doctorId));
+        if (doctor == null) {
+            return new Response(false, "No existe un doctor con ese ID", null);
+        }
+
+        List<Appointment> appointments = storage.getSortedAppointmentsForDoctor(Long.parseLong(doctorId), pendingOnly);
+
+        ArrayList<HashMap<String, Object>> serialized = new ArrayList<>();
+        for (Appointment a : appointments) {
+            serialized.add(a.serialize());
+        }
+
+        return new Response(true, "Citas obtenidas correctamente", serialized);
     }
 }

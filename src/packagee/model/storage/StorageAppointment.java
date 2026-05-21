@@ -48,7 +48,7 @@ public class StorageAppointment {
    public List<Appointment> getSortedAppointmentsForPatient(long patientId) {
         return this.appointments.values().stream()
             .filter(a -> a.getPatient() != null && a.getPatient().getId() == patientId)
-            .sorted(Comparator.comparing(Appointment::getDatetime))
+            .sorted(Comparator.comparing(Appointment::getDatetime).reversed())
             .collect(Collectors.toList());
     }
 
@@ -60,7 +60,7 @@ public class StorageAppointment {
                 return a.getStatus() != AppointmentStatus.COMPLETED && 
                        a.getStatus() != AppointmentStatus.CANCELED;
             })
-            .sorted(Comparator.comparing(Appointment::getDatetime))
+            .sorted(Comparator.comparing(Appointment::getDatetime).reversed())
             .collect(Collectors.toList());
     }
    
