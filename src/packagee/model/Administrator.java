@@ -15,8 +15,11 @@ public class Administrator extends User implements ISerializable{
     public Administrator(long id, String username, String firstname, String lastname, String password) {
         super(id, username, firstname, lastname, password);
     }
+    
+    
 
     @Override
+    //Revisar
     public HashMap<String, Object> serialize() {
         HashMap<String, Object> serializedData = new HashMap<>();
         
@@ -24,7 +27,6 @@ public class Administrator extends User implements ISerializable{
         serializedData.put("username", this.username);
         serializedData.put("firstname", this.firstname);
         serializedData.put("lastname", this.lastname);
-        serializedData.put("password", this.password);
         
         return serializedData;
     }

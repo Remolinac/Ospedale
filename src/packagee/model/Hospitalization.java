@@ -17,21 +17,17 @@ public class Hospitalization implements ISerializable  {
     private Patient patient;
     private Doctor doctor;
     private LocalDate date;
-
-    public String getId() {
-        return id;
-    }
     private String reason;
     private RoomType roomType;
     private String observations;
     private HospitalizationStatus status;
+    private static int generateID = 1;
 
     public void setStatus(HospitalizationStatus status) {
         this.status = status;
     }
 
-    public Hospitalization(String id, Patient patient, Doctor doctor, LocalDate date, String reason, RoomType roomType, String observations) {
-        this.id = id;
+    public Hospitalization(Patient patient, Doctor doctor, LocalDate date, String reason, RoomType roomType, String observations) {
         this.patient = patient;
         patient.setHospitalization(this);
         this.doctor = doctor;
@@ -41,9 +37,10 @@ public class Hospitalization implements ISerializable  {
         this.roomType = roomType;
         this.observations = observations;
         this.status = HospitalizationStatus.REQUESTED;
+        this.id = "H" + String.valueOf(patient.getId()) + String.format("%04d", generateID);
+        generateID += 1;
     }
-    public Hospitalization(String id, Patient patient, Doctor doctor, LocalDate date, String reason, RoomType roomType, String observations, HospitalizationStatus hopsS) {
-        this.id = id;
+    public Hospitalization(Patient patient, Doctor doctor, LocalDate date, String reason, RoomType roomType, String observations, HospitalizationStatus hopsS) {
         this.patient = patient;
         patient.setHospitalization(this);
         this.doctor = doctor;
@@ -53,6 +50,8 @@ public class Hospitalization implements ISerializable  {
         this.roomType = roomType;
         this.observations = observations;
         this.status = hopsS;
+        this.id = "H" + String.valueOf(patient.getId()) + String.format("%04d", generateID);
+        generateID += 1;
     }
 
     public Patient getPatient() {
@@ -81,6 +80,10 @@ public class Hospitalization implements ISerializable  {
 
     public HospitalizationStatus getStatus() {
         return status;
+    }
+    
+    public String getId() {
+        return id;
     }
 
     public void setPatient(Patient patient) {
@@ -114,8 +117,8 @@ public class Hospitalization implements ISerializable  {
         HashMap<String, Object> serializedData = new HashMap<>();
         
         serializedData.put("id", this.id);
-        serializedData.put("patient", this.patient);
-        serializedData.put("doctor", this.doctor);
+        serializedData.put("patientId", this.patient != null ? this.patient.getId() : null);
+        serializedData.put("doctorId", this.doctor != null ? this.doctor.getId() : null);
         serializedData.put("date", this.date);
         serializedData.put("reason", this.reason);
         serializedData.put("roomType", this.roomType);

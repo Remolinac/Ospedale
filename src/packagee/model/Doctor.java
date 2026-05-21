@@ -4,10 +4,9 @@
  */
 package packagee.model;
 
-import packagee.model.Appointment;
-import packagee.model.User;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.time.LocalDate;
 
 /**
  *
@@ -48,11 +47,6 @@ public class Doctor extends User implements ISerializable{
     public ArrayList<Hospitalization> getHospitalizations() {
         return hospitalizations;
     }
-    
-    //Revisar
-    public boolean addHospitalization(Hospitalization hosp){
-        return hospitalizations.add(hosp);
-    }
 
     public void setSpecialty(Specialty specialty) {
         this.specialty = specialty;
@@ -65,6 +59,23 @@ public class Doctor extends User implements ISerializable{
     public void setAssignedOffice(String assignedOffice) {
         this.assignedOffice = assignedOffice;
     }
+    
+    public boolean addHospitalization(Hospitalization hosp){
+        return hospitalizations.add(hosp);
+    }
+    
+    public boolean addAppointment(Appointment app){
+        return appointments.add(app);
+    }
+    
+    public boolean isAvailable(LocalDate date){
+        for(Appointment appointment : this.appointments){
+            if(appointment.getDatetime().equals(date)){
+                return false;
+            }
+        }
+        return true;
+    }
 
     @Override
     public HashMap<String, Object> serialize() {
@@ -74,7 +85,6 @@ public class Doctor extends User implements ISerializable{
         serializedData.put("username", this.username);
         serializedData.put("firstname", this.firstname);
         serializedData.put("lastname", this.lastname);
-        serializedData.put("password", this.password);
         serializedData.put("specialty", this.specialty);
         serializedData.put("licenceNumber", this.licenceNumber);
         serializedData.put("assignedOffice", this.assignedOffice);

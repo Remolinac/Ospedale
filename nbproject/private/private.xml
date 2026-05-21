@@ -2,6 +2,24 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/C:/Users/sierr/OneDrive/Desktop/Documentos/Ospedale/src/packagee/model/Administrator.java</file>
+            <file>file:/C:/Users/sierr/OneDrive/Desktop/Documentos/Ospedale/src/packagee/model/Appointment.java</file>
+            <file>file:/C:/Users/sierr/OneDrive/Desktop/Documentos/Ospedale/src/packagee/model/Doctor.java</file>
+            <file>file:/C:/Users/sierr/OneDrive/Desktop/Documentos/Ospedale/src/packagee/model/Hospitalization.java</file>
+            <file>file:/C:/Users/sierr/OneDrive/Desktop/Documentos/Ospedale/src/packagee/model/HospitalizationStatus.java</file>
+            <file>file:/C:/Users/sierr/OneDrive/Desktop/Documentos/Ospedale/src/packagee/view/AdminView.java</file>
+            <file>file:/C:/Users/sierr/OneDrive/Desktop/Documentos/Ospedale/src/packagee/controller/HospitalizationController.java</file>
+            <file>file:/C:/Users/sierr/OneDrive/Desktop/Documentos/Ospedale/src/packagee/model/Patient.java</file>
+            <file>file:/C:/Users/sierr/OneDrive/Desktop/Documentos/Ospedale/src/packagee/model/User.java</file>
+            <file>file:/C:/Users/sierr/OneDrive/Desktop/Documentos/Ospedale/src/packagee/model/ISerializable.java</file>
+            <file>file:/C:/Users/sierr/OneDrive/Desktop/Documentos/Ospedale/src/packagee/model/storage/StorageDoctor.java</file>
+            <file>file:/C:/Users/sierr/OneDrive/Desktop/Documentos/Ospedale/src/packagee/controller/PatientController.java</file>
+            <file>file:/C:/Users/sierr/OneDrive/Desktop/Documentos/Ospedale/src/packagee/model/storage/StorageAppointment.java</file>
+            <file>file:/C:/Users/sierr/OneDrive/Desktop/Documentos/Ospedale/src/packagee/model/Prescription.java</file>
+            <file>file:/C:/Users/sierr/OneDrive/Desktop/Documentos/Ospedale/src/packagee/model/storage/StorageHospitalization.java</file>
+            <file>file:/C:/Users/sierr/OneDrive/Desktop/Documentos/Ospedale/src/packagee/model/storage/StoragePatient.java</file>
+            <file>file:/C:/Users/sierr/OneDrive/Desktop/Documentos/Ospedale/src/packagee/model/storage/StorageHospital.java</file>
+        </group>
     </open-files>
 </project-private>

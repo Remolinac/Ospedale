@@ -50,6 +50,7 @@ public class Patient extends User implements ISerializable {
         return appointments;
     }
     
+    
     public void addAppointment(Appointment a) {
         this.appointments.add(a);
     }
@@ -72,7 +73,6 @@ public class Patient extends User implements ISerializable {
         serializedData.put("username", this.username);
         serializedData.put("firstname", this.firstname);
         serializedData.put("lastname", this.lastname);
-        serializedData.put("password", this.password);
         serializedData.put("email", this.email);
         serializedData.put("birthdate", this.birthdate);
         serializedData.put("gender", this.gender);
