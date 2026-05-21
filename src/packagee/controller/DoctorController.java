@@ -4,6 +4,9 @@
  */
 package packagee.controller;
 
+import packagee.model.Doctor;
+import packagee.model.Specialty;
+import packagee.model.storage.StorageHospital;
 import packagee.util.Response;
 import packagee.util.Validator;
 
@@ -37,11 +40,29 @@ public class DoctorController {
             return new Response(false, "La oficina debe tener el formato O-XXX", null);
         }
 
-        // TODO: verificar que el ID no exista ya en Hospital
-        // TODO: verificar que el username no exista ya en Hospital
-        // TODO: crear objeto Doctor y guardarlo en Hospital.getInstance()
+        StorageHospital storage = StorageHospital.getInstance();
 
-        return new Response(true, "Doctor registrado correctamente", null);
+        if (storage.getDoctor(Long.parseLong(id)) != null) {
+            return new Response(false, "Ya existe un doctor con ese ID", null);
+        }
+        if (storage.existsByUsername(username)) {
+            return new Response(false, "El nombre de usuario ya está en uso", null);
+        }
+
+        Specialty specialtyEnum;
+        try {
+            specialtyEnum = Specialty.valueOf(specialty.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return new Response(false, "La especialidad no es válida", null);
+        }
+
+        Doctor doctor = new Doctor(
+                Long.parseLong(id), username, firstname, lastname, password,
+                specialtyEnum, licenseNumber, assignedOffice
+        );
+
+        storage.addDoctor(doctor);
+        return new Response(true, "Doctor registrado correctamente", doctor.serialize());
     }
 
     public Response updateDoctor(String id, String username, String firstname,
@@ -67,10 +88,32 @@ public class DoctorController {
             return new Response(false, "La oficina debe tener el formato O-XXX", null);
         }
 
-        // TODO: verificar que el doctor exista en Hospital
-        // TODO: verificar que el nuevo username no lo tenga otro usuario
-        // TODO: actualizar el objeto Doctor en Hospital.getInstance()
+        StorageHospital storage = StorageHospital.getInstance();
 
-        return new Response(true, "Doctor actualizado correctamente", null);
+        Doctor doctor = storage.getDoctor(Long.parseLong(id));
+        if (doctor == null) {
+            return new Response(false, "No existe un doctor con ese ID", null);
+        }
+
+        if (!doctor.getUsername().equals(username) && storage.existsByUsername(username)) {
+            return new Response(false, "El nombre de usuario ya está en uso", null);
+        }
+
+        Specialty specialtyEnum;
+        try {
+            specialtyEnum = Specialty.valueOf(specialty.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return new Response(false, "La especialidad no es válida", null);
+        }
+
+        doctor.setUsername(username);
+        doctor.setFirstname(firstname);
+        doctor.setLastname(lastname);
+        doctor.setPassword(password);
+        doctor.setSpecialty(specialtyEnum);
+        doctor.setLicenceNumber(licenseNumber);
+        doctor.setAssignedOffice(assignedOffice);
+
+        return new Response(true, "Doctor actualizado correctamente", doctor.serialize());
     }
 }

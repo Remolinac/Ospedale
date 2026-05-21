@@ -21,7 +21,7 @@ public class Hospitalization implements ISerializable  {
     private RoomType roomType;
     private String observations;
     private HospitalizationStatus status;
-    private static int generateID = 1;
+    private static int generateID = 0;
 
     public void setStatus(HospitalizationStatus status) {
         this.status = status;
@@ -37,7 +37,7 @@ public class Hospitalization implements ISerializable  {
         this.roomType = roomType;
         this.observations = observations;
         this.status = HospitalizationStatus.REQUESTED;
-        this.id = "H" + String.valueOf(patient.getId()) + String.format("%04d", generateID);
+        this.id = "H-" + String.valueOf(patient.getId()) + "-" + String.format("%04d", generateID);
         generateID += 1;
     }
     public Hospitalization(Patient patient, Doctor doctor, LocalDate date, String reason, RoomType roomType, String observations, HospitalizationStatus hopsS) {
@@ -50,7 +50,7 @@ public class Hospitalization implements ISerializable  {
         this.roomType = roomType;
         this.observations = observations;
         this.status = hopsS;
-        this.id = "H" + String.valueOf(patient.getId()) + String.format("%04d", generateID);
+        this.id = "H-" + String.valueOf(patient.getId()) + "-" + String.format("%04d", generateID);
         generateID += 1;
     }
 

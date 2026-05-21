@@ -11,6 +11,7 @@ import packagee.model.Specialty;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import packagee.model.Administrator;
 /**
  *
  * @author sierr
@@ -52,6 +53,10 @@ public class StorageHospital {
 
     public HashMap<Long, Doctor> getAllDoctors() {
         return this.storageDoctor.getAllDoctors();
+    }
+    
+    public HashMap<Long, Patient> getAllPatients() {
+        return this.storagePatient.getAll();
     }
     
     public Doctor getAvailableDoctorBySpecialty(Specialty specialty, LocalDate date) {
@@ -117,6 +122,15 @@ public class StorageHospital {
     public HashMap<String, Hospitalization> getAllHospitalizations() {
         return this.storageHospitalization.getAll();
     }
-    
-    
+
+    private Administrator admin;
+
+    public void setAdmin(Administrator admin) {
+        this.admin = admin;
+    }
+
+    public Administrator getAdmin() {
+        return this.admin;
+    }
+
 }

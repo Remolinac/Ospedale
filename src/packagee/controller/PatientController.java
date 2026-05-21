@@ -3,6 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package packagee.controller;
+import java.time.LocalDate;
+import packagee.model.Patient;
+import packagee.model.storage.StorageHospital;
 import packagee.util.Response;
 import packagee.util.Validator;
 /**
@@ -38,11 +41,23 @@ public class PatientController {
             return new Response(false, "La dirección no puede estar vacía", null);
         }
 
-        // TODO: verificar que el ID no exista ya en Hospital
-        // TODO: verificar que el username no exista ya en Hospital
-        // TODO: crear objeto Patient y guardarlo en Hospital.getInstance()
+        StorageHospital storage = StorageHospital.getInstance();
 
-        return new Response(true, "Paciente registrado correctamente", null);
+        if (storage.getPatient(Long.parseLong(id)) != null) {
+            return new Response(false, "Ya existe un paciente con ese ID", null);
+        }
+        if (storage.existsByUsername(username)) {
+            return new Response(false, "El nombre de usuario ya está en uso", null);
+        }
+
+        boolean isMale = gender.equalsIgnoreCase("M");
+        Patient patient = new Patient(
+                Long.parseLong(id), username, firstname, lastname, password,
+                email, LocalDate.parse(birthdate), isMale, Long.parseLong(phone), address
+        );
+
+        storage.addPatient(patient);
+        return new Response(true, "Paciente registrado correctamente", patient.serialize());
     }
 
     public Response updatePatient(String id, String username, String firstname,
@@ -72,10 +87,29 @@ public class PatientController {
             return new Response(false, "La dirección no puede estar vacía", null);
         }
 
-        // TODO: verificar que el paciente exista en Hospital
-        // TODO: verificar que el nuevo username no lo tenga otro usuario
-        // TODO: actualizar el objeto Patient en Hospital.getInstance()
+        StorageHospital storage = StorageHospital.getInstance();
 
-        return new Response(true, "Paciente actualizado correctamente", null);
+        Patient patient = storage.getPatient(Long.parseLong(id));
+        if (patient == null) {
+            return new Response(false, "No existe un paciente con ese ID", null);
+        }
+
+        // Verificar que el nuevo username no lo tenga otro usuario
+        if (!patient.getUsername().equals(username) && storage.existsByUsername(username)) {
+            return new Response(false, "El nombre de usuario ya está en uso", null);
+        }
+
+        boolean isMale = gender.equalsIgnoreCase("M");
+        patient.setUsername(username);
+        patient.setFirstname(firstname);
+        patient.setLastname(lastname);
+        patient.setPassword(password);
+        patient.setEmail(email);
+        patient.setPhone(Long.parseLong(phone));
+        patient.setBirthdate(LocalDate.parse(birthdate));
+        patient.setGender(isMale);
+        patient.setAddress(address);
+
+        return new Response(true, "Paciente actualizado correctamente", patient.serialize());
     }
 }

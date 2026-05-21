@@ -31,7 +31,7 @@ public class Appointment implements ISerializable{
     private String observations;
     private String recommendedTreatment;
     private String followUp;
-    private static int generateID = 1;
+    private static int generateID = 0;
 
     public void setDiagnosis(String diagnosis) {
         this.diagnosis = diagnosis;
@@ -62,7 +62,7 @@ public class Appointment implements ISerializable{
         this.status = AppointmentStatus.REQUESTED;
         this.prescriptions = new ArrayList<>();
         
-        this.id = "A" + String.valueOf(patient.getId()) + String.format("%04d", generateID);
+        this.id = "A-" + String.valueOf(patient.getId()) + "-" + String.format("%04d", generateID);
         generateID += 1;
     }
     
