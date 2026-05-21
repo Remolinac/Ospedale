@@ -6,12 +6,13 @@ package packagee.model;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
  * @author edangulo
  */
-public class Appointment {
+public class Appointment implements ISerializable{
     
     private final String id;
     private Patient patient;
@@ -30,6 +31,7 @@ public class Appointment {
     private String observations;
     private String recommendedTreatment;
     private String followUp;
+    private static int generateID = 1;
 
     public void setDiagnosis(String diagnosis) {
         this.diagnosis = diagnosis;
@@ -47,21 +49,28 @@ public class Appointment {
         this.followUp = followUp;
     }
 
-    public Appointment(String id, Patient patient, Doctor doctor, Specialty specialty, LocalDateTime datetime, String reason, boolean type) {
-        this.id = id;
+    public Appointment(Patient patient, Doctor doctor, Specialty specialty, LocalDateTime datetime, String reason, boolean type) {
+        
         this.patient = patient;
+        this.patient.addAppointment(this);
         this.doctor = doctor;
+        this.doctor.addAppointment(this);
         this.specialty = specialty;
         this.datetime = datetime;
         this.reason = reason;
         this.type = type;
         this.status = AppointmentStatus.REQUESTED;
         this.prescriptions = new ArrayList<>();
+        
+        this.id = "A" + String.valueOf(patient.getId()) + String.format("%04d", generateID);
+        generateID += 1;
     }
+    
 
     public void setStatus(AppointmentStatus status) {
         this.status = status;
     }
+    
 
     public String getId() {
         return id;
@@ -93,6 +102,23 @@ public class Appointment {
 
     public boolean addPrescription(Prescription prescrip) {
         return this.prescriptions.add(prescrip);
+    }
+
+    @Override
+    public HashMap<String, Object> serialize() {
+        HashMap<String, Object> serializedData = new HashMap<>();
+        
+        serializedData.put("id", this.id);
+        serializedData.put("patientId", this.patient != null ? this.patient.getId() : null);
+        serializedData.put("doctorId", this.doctor != null ? this.doctor.getId() : null);
+        serializedData.put("specialty", this.specialty);
+        serializedData.put("datetime", this.datetime);
+        serializedData.put("reason", this.reason);
+        serializedData.put("type", this.type);
+        serializedData.put("status", this.status);
+        serializedData.put("prescriptions", this.prescriptions);
+        
+        return serializedData;
     }
     
 }
