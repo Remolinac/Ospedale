@@ -52,9 +52,15 @@ public class PatientController {
 
         boolean isMale = gender.equalsIgnoreCase("M");
         Patient patient = new Patient(
-                Long.parseLong(id), username, firstname, lastname, password,
-                email, LocalDate.parse(birthdate), isMale, Long.parseLong(phone), address
-        );
+                Long.parseLong(id), username,
+                firstname,
+                lastname,
+                password,
+                email,
+                LocalDate.parse(birthdate),
+                isMale,
+                Long.parseLong(phone),
+                address);
 
         storage.addPatient(patient);
         return new Response(true, "Paciente registrado correctamente", patient.serialize());

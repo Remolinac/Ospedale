@@ -16,6 +16,7 @@ import packagee.model.Doctor;
 import packagee.model.Patient;
 import packagee.model.Prescription;
 import packagee.model.Specialty;
+import packagee.model.Prescription;
 import packagee.model.storage.StorageHospital;
 import packagee.util.Response;
 import packagee.util.Validator;

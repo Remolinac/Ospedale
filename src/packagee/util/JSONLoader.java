@@ -1,4 +1,4 @@
-/*
+    /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
@@ -15,10 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-/**
- *
- * @author berri
- */
+
 public class JSONLoader {
 
     public static void loadUsers(String filePath) {
@@ -34,71 +31,69 @@ public class JSONLoader {
 
                 switch (type) {
                     case "admin":
-                        Administrator admin = new Administrator(
-                                user.getLong("id"),
-                                user.getString("username"),
-                                user.getString("firstname"),
-                                user.getString("lastname"),
-                                user.getString("password")
-                        );
-                        storage.setAdmin(admin);
+                        storage.setAdmin(new Administrator(
+                            user.getLong("id"),
+                            user.getString("username"),
+                            user.getString("firstname"),
+                            user.getString("lastname"),
+                            user.getString("password")
+                        ));
                         break;
 
                     case "patient":
-                        Patient patient = new Patient(
-                                user.getLong("id"),
-                                user.getString("username"),
-                                user.getString("firstname"),
-                                user.getString("lastname"),
-                                user.getString("password"),
-                                user.getString("email"),
-                                LocalDate.parse(user.getString("birthdate")),
-                                user.getBoolean("gender"),
-                                user.getLong("phone"),
-                                user.getString("address")
-                        );
-                        storage.addPatient(patient);
+                        storage.addPatient(new Patient(
+                            user.getLong("id"),
+                            user.getString("username"),
+                            user.getString("firstname"),
+                            user.getString("lastname"),
+                            user.getString("password"),
+                            user.getString("email"),
+                            LocalDate.parse(user.getString("birthdate")),
+                            user.getBoolean("gender"),
+                            user.getLong("phone"),
+                            user.getString("address")
+                        ));
                         break;
 
                     case "doctor":
                         Specialty specialty = parseSpecialty(user.getString("specialty"));
                         if (specialty == null) break;
-
-                        Doctor doctor = new Doctor(
-                                user.getLong("id"),
-                                user.getString("username"),
-                                user.getString("firstname"),
-                                user.getString("lastname"),
-                                user.getString("password"),
-                                specialty,
-                                user.getString("licenceNumber"),
-                                user.getString("assignedOffice")
-                        );
-                        storage.addDoctor(doctor);
+                        storage.addDoctor(new Doctor(
+                            user.getLong("id"),
+                            user.getString("username"),
+                            user.getString("firstname"),
+                            user.getString("lastname"),
+                            user.getString("password"),
+                            specialty,
+                            user.getString("licenceNumber"),
+                            user.getString("assignedOffice")
+                        ));
                         break;
                 }
             }
+            System.out.println("JSON cargado correctamente: " + filePath);
         } catch (IOException e) {
-            System.out.println("Error leyendo el archivo JSON: " + e.getMessage());
+            System.out.println("Error leyendo JSON (" + filePath + "): " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error parseando JSON: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private static Specialty parseSpecialty(String specialty) {
-        switch (specialty.toUpperCase()) {
-            case "CARDIOLOGY": return Specialty.CARDIOLOGY;
-            case "NEUROLOGY": return Specialty.NEUROLOGY;
-            case "PEDIATRICS": return Specialty.PEDIATRICS;
-            case "DERMATOLOGY": return Specialty.DERMATOLOGY;
-            case "ORTHOPEDICS": return Specialty.TRAUMATOLOGY_ORTHOPEDICS;
-            case "GYNECOLOGY": return Specialty.GYNECOLOGY_OBSTETRICS;
-            case "PSYCHIATRY": return Specialty.PSYCHIATRY;
-            case "ONCOLOGY": return Specialty.ONCOLOGY;
-            case "GENERAL_MEDICINE": return Specialty.GENERAL_MEDICINE;
-            case "OPHTHALMOLOGY": return Specialty.OPHTHALMOLOGY;
-            case "INTERNAL_MEDICINE": return Specialty.INTERNAL_MEDICINE;
-            default:
-                System.out.println("Especialidad no reconocida: " + specialty);
-                return null;
+    private static Specialty parseSpecialty(String raw) {
+        if (raw == null) return null;
+        String s = raw.trim().toUpperCase();
+        switch (s) {
+            case "ORTHOPEDICS": s = "TRAUMATOLOGY_ORTHOPEDICS"; break;
+            case "GYNECOLOGY":  s = "GYNECOLOGY_OBSTETRICS";   break;
+            case "GENERAL":     s = "GENERAL_MEDICINE";         break;
+            case "INTERNAL":    s = "INTERNAL_MEDICINE";        break;
+        }
+        try {
+            return Specialty.valueOf(s);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Especialidad no reconocida: " + raw);
+            return null;
         }
     }
 }

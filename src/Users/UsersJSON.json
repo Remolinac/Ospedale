@@ -20,6 +20,17 @@
       "assignedOffice": "O-101"
     },
     {
+      "type": "doctor",
+      "id": 100000000002,
+      "username": "drlopez",
+      "firstname": "Maria",
+      "lastname": "Lopez",
+      "password": "doctor123",
+      "specialty": "GENERAL_MEDICINE",
+      "licenceNumber": "L-0987654321 MTL",
+      "assignedOffice": "O-102"
+    },
+    {
       "type": "patient",
       "id": 100000000003,
       "username": "paciente1",
@@ -31,6 +42,19 @@
       "gender": true,
       "phone": 3001234567,
       "address": "Calle 123 #45-67"
+    },
+    {
+      "type": "patient",
+      "id": 100000000004,
+      "username": "paciente2",
+      "firstname": "Ana",
+      "lastname": "Martinez",
+      "password": "paciente123",
+      "email": "ana@email.com",
+      "birthdate": "1985-11-20",
+      "gender": false,
+      "phone": 3109876543,
+      "address": "Carrera 8 #12-34"
     }
   ]
 }
