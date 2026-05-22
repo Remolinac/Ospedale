@@ -13,7 +13,7 @@ import java.util.HashMap;
  * @author edangulo
  */
 public class Patient extends User implements ISerializable {
-    
+
     private String email;
     private LocalDate birthdate;
     private boolean gender;
@@ -71,21 +71,21 @@ public class Patient extends User implements ISerializable {
     }
 
     public Patient(long id, String username, String firstname, String lastname, String password,
-           String email, LocalDate birthdate, Boolean gender,
-           long phone, String address) {
-    super(id, username, firstname, lastname, password);
-    this.email = email;
-    this.birthdate = birthdate;
-    this.gender = gender;
-    this.phone = phone;
-    this.address = address;
-    this.appointments = new ArrayList<>();
-}
+            String email, LocalDate birthdate, Boolean gender,
+            long phone, String address) {
+        super(id, username, firstname, lastname, password);
+        this.email = email;
+        this.birthdate = birthdate;
+        this.gender = gender;
+        this.phone = phone;
+        this.address = address;
+        this.appointments = new ArrayList<>();
+    }
 
     @Override
     public HashMap<String, Object> serialize() {
         HashMap<String, Object> serializedData = new HashMap<>();
-        
+
         serializedData.put("id", this.id);
         serializedData.put("username", this.username);
         serializedData.put("firstname", this.firstname);
@@ -95,17 +95,17 @@ public class Patient extends User implements ISerializable {
         serializedData.put("gender", this.gender);
         serializedData.put("phone", this.phone);
         serializedData.put("address", this.address);
-        serializedData.put("hospitalizationId",this.hospitalization != null ? this.hospitalization.getId(): null);
-        
+        serializedData.put("hospitalizationId", this.hospitalization != null ? this.hospitalization.getId() : null);
+
         ArrayList<HashMap<String, Object>> serializedAppointments = new ArrayList<>();
-        
+
         for (Appointment a : this.appointments) {
-        serializedAppointments.add(a.serialize());
-         }
-        
+            serializedAppointments.add(a.serialize());
+        }
+
         serializedData.put("appointments", serializedAppointments);
-        
+
         return serializedData;
     }
-    
+
 }

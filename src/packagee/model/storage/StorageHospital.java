@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package packagee.model.storage;
+
 import packagee.model.Doctor;
 import packagee.model.Appointment;
 import packagee.model.Hospitalization;
@@ -12,17 +13,17 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import packagee.model.Administrator;
-/**
- *
- * @author sierr
- */
-public class StorageHospital {
+import packagee.util.Observable;
+
+public class StorageHospital extends Observable {
+
     private StorageAppointment storageAppointment;
     private StorageDoctor storageDoctor;
     private StoragePatient storagePatient;
     private StorageHospitalization storageHospitalization;
-    
-    private static  StorageHospital instance;
+    private Administrator admin;
+
+    private static StorageHospital instance;
 
     private StorageHospital() {
         this.storageAppointment = new StorageAppointment();
@@ -30,7 +31,7 @@ public class StorageHospital {
         this.storagePatient = new StoragePatient();
         this.storageHospitalization = new StorageHospitalization();
     }
-    
+
     public static StorageHospital getInstance() {
         if (instance == null) {
             instance = new StorageHospital();
@@ -38,9 +39,13 @@ public class StorageHospital {
         return instance;
     }
 
-    //Métodos para Doctores
-   public boolean addDoctor(Doctor doctor) {
-        return this.storageDoctor.addDoctor(doctor);
+    // ── Doctores ──
+    public boolean addDoctor(Doctor doctor) {
+        boolean result = this.storageDoctor.addDoctor(doctor);
+        if (result) {
+            notifyObservers("DOCTOR_ADDED");
+        }
+        return result;
     }
 
     public Doctor getDoctor(long id) {
@@ -54,18 +59,27 @@ public class StorageHospital {
     public HashMap<Long, Doctor> getAllDoctors() {
         return this.storageDoctor.getAllDoctors();
     }
-    
-    public HashMap<Long, Patient> getAllPatients() {
-        return this.storagePatient.getAll();
-    }
-    
+
     public Doctor getAvailableDoctorBySpecialty(Specialty specialty, LocalDate date) {
         return this.storageDoctor.getAvailableDoctorBySpecialty(specialty, date);
     }
 
-   //Métodos para pacientes
+    public boolean existsByUsernameInDoctors(String username) {
+        for (Doctor d : this.storageDoctor.getAllDoctors().values()) {
+            if (d.getUsername().equalsIgnoreCase(username)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ── Pacientes ──
     public boolean addPatient(Patient patient) {
-        return this.storagePatient.addPatient(patient);
+        boolean result = this.storagePatient.addPatient(patient);
+        if (result) {
+            notifyObservers("PATIENT_ADDED");
+        }
+        return result;
     }
 
     public Patient getPatient(long id) {
@@ -76,22 +90,21 @@ public class StorageHospital {
         return this.storagePatient.deletePatient(id);
     }
 
+    public HashMap<Long, Patient> getAllPatients() {
+        return this.storagePatient.getAll();
+    }
+
     public boolean existsByUsername(String username) {
         return this.storagePatient.existsByUsername(username);
     }
 
-    public boolean existsByUsernameInDoctors(String username) {
-        for (Doctor doctor : this.storageDoctor.getAllDoctors().values()) {
-            if (doctor.getUsername().equalsIgnoreCase(username)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    //Métodos para citas 
+    // ── Citas ──
     public boolean addAppointment(Appointment appointment) {
-        return this.storageAppointment.addAppointment(appointment);
+        boolean result = this.storageAppointment.addAppointment(appointment);
+        if (result) {
+            notifyObservers("APPOINTMENT_ADDED");
+        }
+        return result;
     }
 
     public Appointment getAppointment(String id) {
@@ -105,19 +118,22 @@ public class StorageHospital {
     public HashMap<String, Appointment> getAllAppointments() {
         return this.storageAppointment.getAllappointment();
     }
-    
-    public List<Appointment> getSortedAppointmentsForPatient(long patientId){
+
+    public List<Appointment> getSortedAppointmentsForPatient(long patientId) {
         return this.storageAppointment.getSortedAppointmentsForPatient(patientId);
     }
-    
-    public List<Appointment> getSortedAppointmentsForDoctor(long doctorId, boolean pendingOnly){
+
+    public List<Appointment> getSortedAppointmentsForDoctor(long doctorId, boolean pendingOnly) {
         return this.storageAppointment.getSortedAppointmentsForDoctor(doctorId, pendingOnly);
     }
-          
-    
-    //Métodos para hospitalizaciones 
+
+    // ── Hospitalizaciones ──
     public boolean addHospitalization(Hospitalization hospitalization) {
-        return this.storageHospitalization.addHospitalization(hospitalization);
+        boolean result = this.storageHospitalization.addHospitalization(hospitalization);
+        if (result) {
+            notifyObservers("HOSPITALIZATION_ADDED");
+        }
+        return result;
     }
 
     public Hospitalization getHospitalization(String id) {
@@ -132,8 +148,7 @@ public class StorageHospital {
         return this.storageHospitalization.getAll();
     }
 
-    private Administrator admin;
-
+    // ── Admin ──
     public void setAdmin(Administrator admin) {
         this.admin = admin;
     }
@@ -141,7 +156,4 @@ public class StorageHospital {
     public Administrator getAdmin() {
         return this.admin;
     }
-
 }
-
-

@@ -25,7 +25,6 @@ import packagee.util.Validator;
  *
  * @author sierr
  */
-
 public class AppointmentController {
 
     public Response requestAppointmentByDoctor(String patientId, String doctorId,

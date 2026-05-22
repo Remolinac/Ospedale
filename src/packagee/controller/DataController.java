@@ -17,7 +17,6 @@ import packagee.util.Response;
  *
  * @author berri
  */
-
 public class DataController {
 
     public Response getAllPatients() {

@@ -1,4 +1,4 @@
-    /*
+/*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
@@ -32,41 +32,43 @@ public class JSONLoader {
                 switch (type) {
                     case "admin":
                         storage.setAdmin(new Administrator(
-                            user.getLong("id"),
-                            user.getString("username"),
-                            user.getString("firstname"),
-                            user.getString("lastname"),
-                            user.getString("password")
+                                user.getLong("id"),
+                                user.getString("username"),
+                                user.getString("firstname"),
+                                user.getString("lastname"),
+                                user.getString("password")
                         ));
                         break;
 
                     case "patient":
                         storage.addPatient(new Patient(
-                            user.getLong("id"),
-                            user.getString("username"),
-                            user.getString("firstname"),
-                            user.getString("lastname"),
-                            user.getString("password"),
-                            user.getString("email"),
-                            LocalDate.parse(user.getString("birthdate")),
-                            user.getBoolean("gender"),
-                            user.getLong("phone"),
-                            user.getString("address")
+                                user.getLong("id"),
+                                user.getString("username"),
+                                user.getString("firstname"),
+                                user.getString("lastname"),
+                                user.getString("password"),
+                                user.getString("email"),
+                                LocalDate.parse(user.getString("birthdate")),
+                                user.getBoolean("gender"),
+                                user.getLong("phone"),
+                                user.getString("address")
                         ));
                         break;
 
                     case "doctor":
                         Specialty specialty = parseSpecialty(user.getString("specialty"));
-                        if (specialty == null) break;
+                        if (specialty == null) {
+                            break;
+                        }
                         storage.addDoctor(new Doctor(
-                            user.getLong("id"),
-                            user.getString("username"),
-                            user.getString("firstname"),
-                            user.getString("lastname"),
-                            user.getString("password"),
-                            specialty,
-                            user.getString("licenceNumber"),
-                            user.getString("assignedOffice")
+                                user.getLong("id"),
+                                user.getString("username"),
+                                user.getString("firstname"),
+                                user.getString("lastname"),
+                                user.getString("password"),
+                                specialty,
+                                user.getString("licenceNumber"),
+                                user.getString("assignedOffice")
                         ));
                         break;
                 }
@@ -81,13 +83,23 @@ public class JSONLoader {
     }
 
     private static Specialty parseSpecialty(String raw) {
-        if (raw == null) return null;
+        if (raw == null) {
+            return null;
+        }
         String s = raw.trim().toUpperCase();
         switch (s) {
-            case "ORTHOPEDICS": s = "TRAUMATOLOGY_ORTHOPEDICS"; break;
-            case "GYNECOLOGY":  s = "GYNECOLOGY_OBSTETRICS";   break;
-            case "GENERAL":     s = "GENERAL_MEDICINE";         break;
-            case "INTERNAL":    s = "INTERNAL_MEDICINE";        break;
+            case "ORTHOPEDICS":
+                s = "TRAUMATOLOGY_ORTHOPEDICS";
+                break;
+            case "GYNECOLOGY":
+                s = "GYNECOLOGY_OBSTETRICS";
+                break;
+            case "GENERAL":
+                s = "GENERAL_MEDICINE";
+                break;
+            case "INTERNAL":
+                s = "INTERNAL_MEDICINE";
+                break;
         }
         try {
             return Specialty.valueOf(s);

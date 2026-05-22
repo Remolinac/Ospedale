@@ -11,5 +11,6 @@ import java.util.HashMap;
  * @author sierr
  */
 public interface ISerializable {
+
     public abstract HashMap<String, Object> serialize();
 }

@@ -9,7 +9,7 @@ package packagee.model;
  * @author edangulo
  */
 public enum Specialty {
-    
+
     GENERAL_MEDICINE,
     CARDIOLOGY,
     PEDIATRICS,
@@ -21,5 +21,5 @@ public enum Specialty {
     ONCOLOGY,
     OPHTHALMOLOGY,
     INTERNAL_MEDICINE
-    
+
 }

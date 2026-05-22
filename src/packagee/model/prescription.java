@@ -9,6 +9,7 @@ package packagee.model;
  * @author jjlora
  */
 public class Prescription {
+
     private Appointment appointment;
     private String medicationName;
     private double dose;
@@ -83,8 +84,5 @@ public class Prescription {
     public void setFrecuency(int frecuency) {
         this.frecuency = frecuency;
     }
-    
-    
-    
-    
+
 }

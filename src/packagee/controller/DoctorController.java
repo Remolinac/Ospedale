@@ -14,7 +14,6 @@ import packagee.util.Validator;
  *
  * @author sierr
  */
-
 public class DoctorController {
 
     public Response registerDoctor(String id, String username, String firstname,

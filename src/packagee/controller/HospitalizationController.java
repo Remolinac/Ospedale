@@ -22,7 +22,6 @@ import packagee.util.Validator;
  *
  * @author sierr
  */
-
 public class HospitalizationController {
 
     public Response requestHospitalization(String patientId, String doctorId,

@@ -9,10 +9,10 @@ package packagee.model;
  * @author edangulo
  */
 public enum AppointmentStatus {
-    
-    REQUESTED, 
-    PENDING, 
-    COMPLETED, 
+
+    REQUESTED,
+    PENDING,
+    COMPLETED,
     CANCELED
-    
+
 }

@@ -3,11 +3,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package packagee.controller;
+
 import java.time.LocalDate;
 import packagee.model.Patient;
 import packagee.model.storage.StorageHospital;
 import packagee.util.Response;
 import packagee.util.Validator;
+
 /**
  *
  * @author sierr

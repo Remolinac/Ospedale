@@ -9,6 +9,7 @@ package packagee.util;
  * @author sierr
  */
 public class Response {
+
     private boolean success;
     private String message;
     private Object data;
@@ -19,7 +20,15 @@ public class Response {
         this.data = data;
     }
 
-    public boolean isSuccess() { return success; }
-    public String getMessage() { return message; }
-    public Object getData() { return data; }
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Object getData() {
+        return data;
+    }
 }

@@ -9,7 +9,7 @@ package packagee.model;
  * @author edangulo
  */
 public abstract class User {
-    
+
     protected final long id;
     protected String username;
 
@@ -59,5 +59,5 @@ public abstract class User {
     public String getPassword() {
         return password;
     }
-    
+
 }

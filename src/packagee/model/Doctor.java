@@ -12,8 +12,8 @@ import java.time.LocalDate;
  *
  * @author edangulo
  */
-public class Doctor extends User implements ISerializable{
-    
+public class Doctor extends User implements ISerializable {
+
     private Specialty specialty;
     private String licenceNumber;
     private String assignedOffice;
@@ -60,18 +60,18 @@ public class Doctor extends User implements ISerializable{
     public void setAssignedOffice(String assignedOffice) {
         this.assignedOffice = assignedOffice;
     }
-    
-    public boolean addHospitalization(Hospitalization hosp){
+
+    public boolean addHospitalization(Hospitalization hosp) {
         return hospitalizations.add(hosp);
     }
-    
-    public boolean addAppointment(Appointment app){
+
+    public boolean addAppointment(Appointment app) {
         return appointments.add(app);
     }
-    
-    public boolean isAvailable(LocalDate date){
-        for(Appointment appointment : this.appointments){
-            if(appointment.getDatetime().equals(date)){
+
+    public boolean isAvailable(LocalDate date) {
+        for (Appointment appointment : this.appointments) {
+            if (appointment.getDatetime().equals(date)) {
                 return false;
             }
         }
@@ -80,8 +80,8 @@ public class Doctor extends User implements ISerializable{
 
     @Override
     public HashMap<String, Object> serialize() {
-      HashMap<String, Object> serializedData = new HashMap<>();
-        
+        HashMap<String, Object> serializedData = new HashMap<>();
+
         serializedData.put("id", this.id);
         serializedData.put("username", this.username);
         serializedData.put("firstname", this.firstname);
@@ -89,9 +89,8 @@ public class Doctor extends User implements ISerializable{
         serializedData.put("specialty", this.specialty);
         serializedData.put("licenceNumber", this.licenceNumber);
         serializedData.put("assignedOffice", this.assignedOffice);
-        
+
         return serializedData;
     }
-    
-    
+
 }

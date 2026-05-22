@@ -9,11 +9,11 @@ package packagee.model;
  * @author edangulo
  */
 public enum RoomType {
-    
+
     STANDARD,
-    ICU,            // Intensive Care Unit
-    NICU,           // Neonatal Intensive Care Unit
-    IMC,            // Intermediate Care Unit
+    ICU, // Intensive Care Unit
+    NICU, // Neonatal Intensive Care Unit
+    IMC, // Intermediate Care Unit
     ISOLATION
-    
+
 }

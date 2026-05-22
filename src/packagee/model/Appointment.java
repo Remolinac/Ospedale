@@ -26,7 +26,7 @@ public class Appointment implements ISerializable {
     private static int generateID = 0;
 
     public Appointment(Patient patient, Doctor doctor, Specialty specialty,
-                       LocalDateTime datetime, String reason, boolean type) {
+            LocalDateTime datetime, String reason, boolean type) {
         this.patient = patient;
         this.patient.addAppointment(this);
         this.doctor = doctor;
@@ -40,48 +40,105 @@ public class Appointment implements ISerializable {
         this.id = "A-" + patient.getId() + "-" + String.format("%04d", generateID++);
     }
 
-    public void setStatus(AppointmentStatus status)      { this.status = status; }
-    public void setReason(String reason)                 { this.reason = reason; }
-    public void setDatetime(LocalDateTime datetime)      { this.datetime = datetime; }
-    public void setDiagnosis(String diagnosis)           { this.diagnosis = diagnosis; }
-    public void setObservations(String observations)     { this.observations = observations; }
-    public void setRecommendedTreatment(String rt)       { this.recommendedTreatment = rt; }
-    public void setFollowUp(String followUp)             { this.followUp = followUp; }
+    public void setStatus(AppointmentStatus status) {
+        this.status = status;
+    }
 
-    public String getId()                   { return id; }
-    public Patient getPatient()             { return patient; }
-    public Doctor getDoctor()               { return doctor; }
-    public Specialty getSpecialty()         { return specialty; }
-    public LocalDateTime getDatetime()      { return datetime; }
-    public String getReason()               { return reason; }
-    public boolean isType()                 { return type; }
-    public AppointmentStatus getStatus()    { return status; }
-    public String getDiagnosis()            { return diagnosis; }
-    public String getObservations()         { return observations; }
-    public String getRecommendedTreatment() { return recommendedTreatment; }
-    public String getFollowUp()             { return followUp; }
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
 
-    public boolean addPrescription(Prescription p) { return prescriptions.add(p); }
+    public void setDatetime(LocalDateTime datetime) {
+        this.datetime = datetime;
+    }
+
+    public void setDiagnosis(String diagnosis) {
+        this.diagnosis = diagnosis;
+    }
+
+    public void setObservations(String observations) {
+        this.observations = observations;
+    }
+
+    public void setRecommendedTreatment(String rt) {
+        this.recommendedTreatment = rt;
+    }
+
+    public void setFollowUp(String followUp) {
+        this.followUp = followUp;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public Patient getPatient() {
+        return patient;
+    }
+
+    public Doctor getDoctor() {
+        return doctor;
+    }
+
+    public Specialty getSpecialty() {
+        return specialty;
+    }
+
+    public LocalDateTime getDatetime() {
+        return datetime;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public boolean isType() {
+        return type;
+    }
+
+    public AppointmentStatus getStatus() {
+        return status;
+    }
+
+    public String getDiagnosis() {
+        return diagnosis;
+    }
+
+    public String getObservations() {
+        return observations;
+    }
+
+    public String getRecommendedTreatment() {
+        return recommendedTreatment;
+    }
+
+    public String getFollowUp() {
+        return followUp;
+    }
+
+    public boolean addPrescription(Prescription p) {
+        return prescriptions.add(p);
+    }
 
     @Override
     public HashMap<String, Object> serialize() {
         HashMap<String, Object> data = new HashMap<>();
-        data.put("id",          this.id);
-        data.put("patientId",   this.patient != null ? this.patient.getId() : null);
+        data.put("id", this.id);
+        data.put("patientId", this.patient != null ? this.patient.getId() : null);
         data.put("patientName", this.patient != null
-            ? this.patient.getFirstname() + " " + this.patient.getLastname() : "");
-        data.put("doctorId",    this.doctor != null ? this.doctor.getId() : null);
-        data.put("doctorName",  this.doctor != null
-            ? this.doctor.getFirstname() + " " + this.doctor.getLastname() : "");
-        data.put("specialty",   this.specialty != null ? this.specialty.name() : "");
-        data.put("datetime",    this.datetime != null ? this.datetime.toString() : "");
-        data.put("reason",      this.reason);
-        data.put("type",        this.type ? "In-person" : "Remote");
-        data.put("status",      this.status != null ? this.status.name() : "");
-        data.put("diagnosis",   this.diagnosis);
+                ? this.patient.getFirstname() + " " + this.patient.getLastname() : "");
+        data.put("doctorId", this.doctor != null ? this.doctor.getId() : null);
+        data.put("doctorName", this.doctor != null
+                ? this.doctor.getFirstname() + " " + this.doctor.getLastname() : "");
+        data.put("specialty", this.specialty != null ? this.specialty.name() : "");
+        data.put("datetime", this.datetime != null ? this.datetime.toString() : "");
+        data.put("reason", this.reason);
+        data.put("type", this.type ? "In-person" : "Remote");
+        data.put("status", this.status != null ? this.status.name() : "");
+        data.put("diagnosis", this.diagnosis);
         data.put("observations", this.observations);
         data.put("recommendedTreatment", this.recommendedTreatment);
-        data.put("followUp",    this.followUp);
+        data.put("followUp", this.followUp);
         return data;
     }
 }
