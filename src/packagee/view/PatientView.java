@@ -18,24 +18,21 @@ import packagee.util.Response;
 public class PatientView extends javax.swing.JFrame implements Observer {
 
     private int x, y;
-    private final Patient patient;
+    private final HashMap<String, Object> patientData;
     private final boolean isAdmin;
     private final PatientController patientController = new PatientController();
     private final AppointmentController appointmentController = new AppointmentController();
     private final HospitalizationController hospitalizationController = new HospitalizationController();
 
-    public PatientView(Patient patient, boolean isAdmin) {
+    public PatientView(HashMap<String, Object> patientData, boolean isAdmin) {
         initComponents();
-        this.patient = patient;
+        this.patientData = patientData;
         this.isAdmin = isAdmin;
         btnBack.setVisible(isAdmin);
         this.setBackground(new Color(0, 0, 0, 0));
         this.setSize(1400, 750);
         this.setLocationRelativeTo(null);
-
-        // Registrar como observer
         StorageHospital.getInstance().addObserver(this);
-
         cargarDatosPatient();
         cargarComboDoctores();
         cargarComboEspecialidades();
@@ -44,7 +41,6 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         cargarComboAppointmentsCancel();
     }
 
-    // ── Observer ──
     @Override
     public void update(String event) {
         switch (event) {
@@ -59,15 +55,14 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         }
     }
 
-    // ── Carga de datos ──
     private void cargarDatosPatient() {
-        txtFirstName.setText(patient.getFirstname());
-        txtLastname.setText(patient.getLastname());
-        txtBirthdate.setText(patient.getBirthdate() != null ? patient.getBirthdate().toString() : "");
-        txtEmail.setText(patient.getEmail());
-        txtPhone.setText(String.valueOf(patient.getPhone()));
-        txtAdress.setText(patient.getAddress());
-        txtUser.setText(patient.getUsername());
+        txtFirstName.setText((String) patientData.get("firstname"));
+        txtLastname.setText((String) patientData.get("lastname"));
+        txtBirthdate.setText(patientData.get("birthdate") != null ? patientData.get("birthdate").toString() : "");
+        txtEmail.setText((String) patientData.get("email"));
+        txtPhone.setText(String.valueOf(patientData.get("phone")));
+        txtAdress.setText((String) patientData.get("address"));
+        txtUser.setText((String) patientData.get("username"));
     }
 
     private void cargarComboDoctores() {
@@ -102,17 +97,15 @@ public class PatientView extends javax.swing.JFrame implements Observer {
 
     @SuppressWarnings("unchecked")
     private void cargarTablaAppointments() {
-        Response r = appointmentController.getPatientAppointments(String.valueOf(patient.getId()));
-        if (!r.isSuccess()) {
-            return;
-        }
+        String patientId = String.valueOf(patientData.get("id"));
+        Response r = appointmentController.getPatientAppointments(patientId);
+        if (!r.isSuccess()) return;
         DefaultTableModel model = (DefaultTableModel) tblPatientView.getModel();
         model.setRowCount(0);
-        ArrayList<HashMap<String, Object>> list
-                = (ArrayList<HashMap<String, Object>>) r.getData();
+        ArrayList<HashMap<String, Object>> list = (ArrayList<HashMap<String, Object>>) r.getData();
         for (HashMap<String, Object> a : list) {
             model.addRow(new Object[]{
-                a.get("id"), a.get("datetime"), a.get("doctorName"),
+                a.get("id"), a.get("datetime"), a.get("doctorId"),
                 a.get("specialty"), a.get("type"), a.get("status")
             });
         }
@@ -121,12 +114,16 @@ public class PatientView extends javax.swing.JFrame implements Observer {
     private void cargarComboAppointmentsCancel() {
         cmbAppointmentCancel.removeAllItems();
         cmbAppointmentCancel.addItem("Select one");
-        for (packagee.model.Appointment ap : patient.getAppointments()) {
-            cmbAppointmentCancel.addItem(ap.getId());
+        String patientId = String.valueOf(patientData.get("id"));
+        Response r = appointmentController.getPatientAppointments(patientId);
+        if (r.isSuccess()) {
+            ArrayList<HashMap<String, Object>> apts = (ArrayList<HashMap<String, Object>>) r.getData();
+            for (HashMap<String, Object> ap : apts) {
+                cmbAppointmentCancel.addItem((String) ap.get("id"));
+            }
         }
     }
 
-    // ── initComponents ──
     @SuppressWarnings("unchecked")
     private void initComponents() {
         panelRound1 = new packagee.view.PanelRound();
@@ -135,15 +132,11 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         lblPatientView = new javax.swing.JLabel();
         btnBack = new javax.swing.JButton();
         tabbedpanePatientView = new javax.swing.JTabbedPane();
-
-        // Tab 1
         jPanelHistory = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         tblPatientView = new javax.swing.JTable();
         btnRefresh = new javax.swing.JButton();
         btnLogout = new javax.swing.JButton();
-
-        // Tab 2
         jPanelInfo = new javax.swing.JPanel();
         lblFirstName = new javax.swing.JLabel();
         txtFirstName = new javax.swing.JTextField();
@@ -167,8 +160,6 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         txtUser = new javax.swing.JTextField();
         btnSave = new javax.swing.JButton();
         lblInfoError = new javax.swing.JLabel();
-
-        // Tab 3
         jPanelRequest = new javax.swing.JPanel();
         lblRequest = new javax.swing.JLabel();
         radiobtnSpecialty = new javax.swing.JRadioButton();
@@ -252,14 +243,11 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         p2.setVerticalGroup(p2.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                 .addComponent(btnX).addComponent(lblPatientView).addComponent(btnBack));
 
-        // ── Tab 1: Appointment history ──
         tblPatientView.setAutoCreateRowSorter(true);
         tblPatientView.setModel(new DefaultTableModel(
                 new Object[][]{},
                 new String[]{"ID", "Date", "Doctor", "Specialty", "Type", "Status"}) {
-            public boolean isCellEditable(int r, int c) {
-                return false;
-            }
+            public boolean isCellEditable(int r, int c) { return false; }
         });
         jScrollPane3.setViewportView(tblPatientView);
 
@@ -295,7 +283,6 @@ public class PatientView extends javax.swing.JFrame implements Observer {
                         .addComponent(btnRefresh).addComponent(btnLogout)));
         tabbedpanePatientView.addTab("Appointment history", jPanelHistory);
 
-        // ── Tab 2: Modify info ──
         lblFirstName.setFont(new java.awt.Font("Yu Gothic UI", 0, 18));
         lblFirstName.setText("Firstname");
         txtFirstName.setFont(new java.awt.Font("Yu Gothic UI", 0, 18));
@@ -385,7 +372,6 @@ public class PatientView extends javax.swing.JFrame implements Observer {
                 .addContainerGap(200, Short.MAX_VALUE));
         tabbedpanePatientView.addTab("Modify info", jPanelInfo);
 
-        // ── Tab 3: Request/Cancel ──
         lblRequest.setFont(new java.awt.Font("Yu Gothic UI", 0, 18));
         lblRequest.setText("Request medical appointment");
         radiobtnSpecialty.setFont(new java.awt.Font("Yu Gothic UI", 0, 18));
@@ -520,7 +506,6 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         jPanelRequest.add(colCancel);
         tabbedpanePatientView.addTab("Request/Cancel", jPanelRequest);
 
-        // ── Root layout ──
         javax.swing.GroupLayout p1 = new javax.swing.GroupLayout(panelRound1);
         panelRound1.setLayout(p1);
         p1.setHorizontalGroup(p1.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -554,11 +539,10 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         this.setLocation(this.getLocation().x + evt.getX() - x, this.getLocation().y + evt.getY() - y);
     }
 
-    // ── Handlers ──
     private void btnSaveActionPerformed() {
         String genderStr = cmbGender.getSelectedIndex() == 2 ? "M" : "F";
         Response r = patientController.updatePatient(
-                String.valueOf(patient.getId()),
+                String.valueOf(patientData.get("id")),
                 txtUser.getText().trim(),
                 txtFirstName.getText().trim(),
                 txtLastname.getText().trim(),
@@ -587,14 +571,14 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         if (radiobtnDoctor.isSelected()) {
             String doctorId = selected.split(" - ")[0].trim();
             r = appointmentController.requestAppointmentByDoctor(
-                    String.valueOf(patient.getId()), doctorId,
+                    String.valueOf(patientData.get("id")), doctorId,
                     txtAppointmentDate.getText().trim(),
                     txtAppointmentTime.getText().trim(),
                     txtareaAppointment.getText().trim()
             );
         } else {
             r = appointmentController.requestAppointmentBySpecialty(
-                    String.valueOf(patient.getId()), selected.trim(),
+                    String.valueOf(patientData.get("id")), selected.trim(),
                     txtAppointmentDate.getText().trim(),
                     txtAppointmentTime.getText().trim(),
                     txtareaAppointment.getText().trim()
@@ -607,7 +591,6 @@ public class PatientView extends javax.swing.JFrame implements Observer {
             txtAppointmentTime.setText("");
             txtareaAppointment.setText("");
             cmbSelectDoctor.setSelectedIndex(0);
-            // Observer recargará la tabla automáticamente
         } else {
             lblAppointmentError.setForeground(Color.RED);
             lblAppointmentError.setText(r.getMessage());
@@ -619,7 +602,7 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         String doctorId = selected.split(" - ")[0].trim();
         String roomType = (String) cmbRoomType.getSelectedItem();
         Response r = hospitalizationController.requestHospitalization(
-                String.valueOf(patient.getId()), doctorId,
+                String.valueOf(patientData.get("id")), doctorId,
                 txtEstimDate.getText().trim(),
                 txtareaHospiReason.getText().trim(),
                 "Select one".equals(roomType) ? "" : roomType,
@@ -642,19 +625,17 @@ public class PatientView extends javax.swing.JFrame implements Observer {
     private void btnCancelActionPerformed() {
         String appointmentId = (String) cmbAppointmentCancel.getSelectedItem();
         Response r = appointmentController.cancelAppointment(
-                appointmentId, String.valueOf(patient.getId()));
+                appointmentId, String.valueOf(patientData.get("id")));
         if (r.isSuccess()) {
             lblCancelError.setForeground(new Color(0, 180, 0));
             lblCancelError.setText(r.getMessage());
             txtareaObservations1.setText("");
-            // Observer recargará automáticamente
         } else {
             lblCancelError.setForeground(Color.RED);
             lblCancelError.setText(r.getMessage());
         }
     }
 
-    // Variables declaration
     private javax.swing.JButton btnBack, btnCancel, btnCreate, btnCreateHospi,
             btnLogout, btnRefresh, btnSave, btnX;
     private javax.swing.JComboBox<String> cmbAppointmentCancel, cmbAppointmentType,

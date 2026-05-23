@@ -4,23 +4,19 @@
  */
 package packagee.view;
 
-import com.formdev.flatlaf.FlatDarkLaf;
-import java.awt.Color;
-import java.time.LocalDate;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.JOptionPane;
-import javax.swing.UIManager;
+
 import packagee.controller.LoginController;
 import packagee.controller.PatientController;
-import packagee.model.Administrator;
+
 import packagee.model.Appointment;
-import packagee.model.Doctor;
+
 import packagee.model.Hospitalization;
-import packagee.model.Patient;
+
 import packagee.model.User;
-import packagee.model.storage.StorageHospital;
+
 import packagee.util.Response;
 
 /**
@@ -37,9 +33,6 @@ public class LoginView extends javax.swing.JFrame {
 
     public LoginView() {
         initComponents();
-        this.users = new ArrayList<>();
-        this.users.add(new Administrator(0, "admin", "admin", "adnim", "admin123")
-        );
     }
 
     /**
@@ -415,9 +408,7 @@ public class LoginView extends javax.swing.JFrame {
             } else if (role.equals("DOCTOR")) {
                 new DoctorView(data).setVisible(true);
             } else if (role.equals("PATIENT")) {
-                long patientId = ((Number) data.get("id")).longValue();
-                Patient pat = StorageHospital.getInstance().getPatient(patientId);
-                new PatientView(pat, false).setVisible(true);
+                new PatientView(data, false).setVisible(true);
             }
 
             this.dispose();
