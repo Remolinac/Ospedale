@@ -57,7 +57,7 @@ public class AdminView extends javax.swing.JFrame implements Observer {
 
         panelRound1 = new packagee.view.PanelRound();
         panelRound2 = new packagee.view.PanelRound();
-        jButton1 = new javax.swing.JButton();
+        btnX = new javax.swing.JButton();
         lblAdminView = new javax.swing.JLabel();
         panelRound3 = new packagee.view.PanelRound();
         btnDoctorView = new javax.swing.JButton();
@@ -80,14 +80,14 @@ public class AdminView extends javax.swing.JFrame implements Observer {
         lblPasswordConfirmation = new javax.swing.JLabel();
         txtPasswordConfirmation = new javax.swing.JTextField();
         cmbSpecialty = new javax.swing.JComboBox<>();
-        jButton9 = new javax.swing.JButton();
+        btnSave = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         cmbDoctor = new javax.swing.JComboBox<>();
         lblDoctor = new javax.swing.JLabel();
         lblPatient = new javax.swing.JLabel();
         cmbPatient = new javax.swing.JComboBox<>();
         jSeparator2 = new javax.swing.JSeparator();
-        jButton10 = new javax.swing.JButton();
+        btnLogout = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
@@ -106,16 +106,16 @@ public class AdminView extends javax.swing.JFrame implements Observer {
             }
         });
 
-        jButton1.setFont(new java.awt.Font("Yu Gothic UI", 0, 18));
-        jButton1.setText("X");
-        jButton1.setBorderPainted(false);
-        jButton1.setContentAreaFilled(false);
-        jButton1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        jButton1.setFocusable(false);
-        jButton1.setRequestFocusEnabled(false);
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnX.setFont(new java.awt.Font("Yu Gothic UI", 0, 18));
+        btnX.setText("X");
+        btnX.setBorderPainted(false);
+        btnX.setContentAreaFilled(false);
+        btnX.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        btnX.setFocusable(false);
+        btnX.setRequestFocusEnabled(false);
+        btnX.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnXActionPerformed(evt);
             }
         });
 
@@ -130,13 +130,13 @@ public class AdminView extends javax.swing.JFrame implements Observer {
                                 .addGap(20, 20, 20)
                                 .addComponent(lblAdminView)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jButton1)
+                                .addComponent(btnX)
                                 .addGap(19, 19, 19))
         );
         panelRound2Layout.setVerticalGroup(
                 panelRound2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelRound2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnX, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(lblAdminView))
         );
 
@@ -191,11 +191,11 @@ public class AdminView extends javax.swing.JFrame implements Observer {
             }
         });
 
-        jButton9.setFont(new java.awt.Font("Yu Gothic UI", 0, 18));
-        jButton9.setText("Save");
-        jButton9.addActionListener(new java.awt.event.ActionListener() {
+        btnSave.setFont(new java.awt.Font("Yu Gothic UI", 0, 18));
+        btnSave.setText("Save");
+        btnSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton9ActionPerformed(evt);
+                btnSaveActionPerformed(evt);
             }
         });
 
@@ -214,11 +214,11 @@ public class AdminView extends javax.swing.JFrame implements Observer {
 
         jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
-        jButton10.setFont(new java.awt.Font("Yu Gothic UI", 0, 18));
-        jButton10.setText("Logout");
-        jButton10.addActionListener(new java.awt.event.ActionListener() {
+        btnLogout.setFont(new java.awt.Font("Yu Gothic UI", 0, 18));
+        btnLogout.setText("Logout");
+        btnLogout.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton10ActionPerformed(evt);
+                btnLogoutActionPerformed(evt);
             }
         });
 
@@ -230,7 +230,7 @@ public class AdminView extends javax.swing.JFrame implements Observer {
                                 .addGroup(panelRound3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                         .addGroup(panelRound3Layout.createSequentialGroup()
                                                 .addGap(311, 311, 311)
-                                                .addComponent(jButton9)
+                                                .addComponent(btnSave)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                         .addGroup(panelRound3Layout.createSequentialGroup()
                                                 .addGap(32, 32, 32)
@@ -286,7 +286,7 @@ public class AdminView extends javax.swing.JFrame implements Observer {
                                                 .addGap(74, 74, 74))
                                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelRound3Layout.createSequentialGroup()
                                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(jButton10)
+                                                .addComponent(btnLogout)
                                                 .addGap(318, 318, 318)))
                                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGroup(panelRound3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -353,9 +353,9 @@ public class AdminView extends javax.swing.JFrame implements Observer {
                                                 .addGap(43, 43, 43)
                                                 .addComponent(btnDoctorView)))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 80, Short.MAX_VALUE)
-                                .addComponent(jButton9)
+                                .addComponent(btnSave)
                                 .addGap(123, 123, 123)
-                                .addComponent(jButton10)
+                                .addComponent(btnLogout)
                                 .addGap(38, 38, 38))
                         .addGroup(panelRound3Layout.createSequentialGroup()
                                 .addGap(203, 203, 203)
@@ -410,11 +410,11 @@ public class AdminView extends javax.swing.JFrame implements Observer {
         this.setLocation(this.getLocation().x + evt.getX() - x, this.getLocation().y + evt.getY() - y);
     }
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {
+    private void btnXActionPerformed(java.awt.event.ActionEvent evt) {
         System.exit(0);
     }
 
-    private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {
+    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {
         // Registrar doctor
         DoctorController controller = new DoctorController();
         String selectedSpec = (String) cmbSpecialty.getSelectedItem();
@@ -468,7 +468,7 @@ public class AdminView extends javax.swing.JFrame implements Observer {
         this.dispose();
     }
 
-    private void jButton10ActionPerformed(java.awt.event.ActionEvent evt) {
+    private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {
         StorageHospital.getInstance().removeObserver(this);
         new LoginView().setVisible(true);
         this.dispose();
@@ -500,9 +500,9 @@ public class AdminView extends javax.swing.JFrame implements Observer {
     private javax.swing.JComboBox<String> cmbDoctor;
     private javax.swing.JComboBox<String> cmbPatient;
     private javax.swing.JComboBox<String> cmbSpecialty;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton10;
-    private javax.swing.JButton jButton9;
+    private javax.swing.JButton btnX;
+    private javax.swing.JButton btnLogout;
+    private javax.swing.JButton btnSave;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JLabel lblAdminView;

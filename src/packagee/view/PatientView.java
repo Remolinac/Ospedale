@@ -30,6 +30,7 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         this.isAdmin = isAdmin;
         btnBack.setVisible(isAdmin);
         this.setBackground(new Color(0, 0, 0, 0));
+        this.setSize(1400, 750);
         this.setLocationRelativeTo(null);
 
         // Registrar como observer
