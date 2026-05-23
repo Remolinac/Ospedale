@@ -769,10 +769,6 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
         // Actualizar doctor
         DoctorController controller = new DoctorController();
         String selectedSpec = (String) cmbSpecialty.getSelectedItem();
-        if (selectedSpec == null || selectedSpec.equals("Select one")) {
-            JOptionPane.showMessageDialog(this, "Selecciona una especialidad", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
         Response response = controller.updateDoctor(
                 String.valueOf(userData.get("id")),
                 txtUsername.getText(), // username
@@ -795,10 +791,6 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
     private void btnAcceptAppointmentActionPerformed(java.awt.event.ActionEvent evt) {
         AppointmentController controller = new AppointmentController();
         String appointmentId = (String) cmbAcceptAppointment.getSelectedItem();
-        if (appointmentId == null || appointmentId.equals("Select one")) {
-            JOptionPane.showMessageDialog(this, "Selecciona una cita", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
         Response response = controller.acceptAppointment(appointmentId, String.valueOf(userData.get("id")));
         if (response.isSuccess()) {
             JOptionPane.showMessageDialog(this, response.getMessage(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -813,10 +805,6 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
         // Reagendar cita
         AppointmentController controller = new AppointmentController();
         String appointmentId = (String) cmbRescheduleAppointment.getSelectedItem();
-        if (appointmentId == null || appointmentId.equals("Select one")) {
-            JOptionPane.showMessageDialog(this, "Selecciona una cita", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
         Response response = controller.rescheduleAppointment(
                 appointmentId, String.valueOf(userData.get("id")),
                 jTextField13.getText(), jTextField14.getText()
@@ -833,10 +821,6 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
         // Completar cita
         AppointmentController controller = new AppointmentController();
         String appointmentId = (String) cmbCompleteAppointment.getSelectedItem();
-        if (appointmentId == null || appointmentId.equals("Select one")) {
-            JOptionPane.showMessageDialog(this, "Selecciona una cita", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
         Response response = controller.completeAppointment(appointmentId, String.valueOf(userData.get("id")));
         if (response.isSuccess()) {
             JOptionPane.showMessageDialog(this, response.getMessage(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -853,10 +837,6 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
         String doctorId = String.valueOf(userData.get("id"));
         if (jRadioButton6.isSelected()) {
             String selectedPatient = (String) cmbPatientId.getSelectedItem();
-            if (selectedPatient == null || selectedPatient.equals("Select one")) {
-                JOptionPane.showMessageDialog(this, "Selecciona un paciente", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
             // Buscar una cita PENDING del paciente para hospitalizar desde ella
             AppointmentController ac = new AppointmentController();
             Response aptsResp = ac.getPatientAppointments(selectedPatient);
@@ -870,10 +850,6 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
                     }
                 }
             }
-            if (appointmentId == null) {
-                JOptionPane.showMessageDialog(this, "El paciente no tiene citas PENDING", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
             Response response = controller.hospitalizeFromAppointment(
                     appointmentId, doctorId, jTextField21.getText(),
                     jTextArea9.getText(), "STANDARD", jTextArea1.getText()
@@ -886,10 +862,6 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
             }
         } else if (jRadioButton5.isSelected()) {
             String hospId = (String) cmbHospitalization.getSelectedItem();
-            if (hospId == null || hospId.equals("Select one")) {
-                JOptionPane.showMessageDialog(this, "Selecciona una hospitalización", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
             Response response = controller.approveHospitalization(hospId, doctorId);
             if (response.isSuccess()) {
                 JOptionPane.showMessageDialog(this, response.getMessage(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -906,10 +878,6 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
         // Denegar hospitalización
         HospitalizationController controller = new HospitalizationController();
         String hospId = (String) cmbHospitalization.getSelectedItem();
-        if (hospId == null || hospId.equals("Select one")) {
-            JOptionPane.showMessageDialog(this, "Selecciona una hospitalización", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
         Response response = controller.denyHospitalization(hospId, String.valueOf(userData.get("id")));
         if (response.isSuccess()) {
             JOptionPane.showMessageDialog(this, response.getMessage(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -921,10 +889,6 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
 
     private void btnSearchPatientActionPerformed(java.awt.event.ActionEvent evt) {
         String selectedPatient = (String) cmbSelectPatient.getSelectedItem();
-        if (selectedPatient == null || selectedPatient.equals("Select one")) {
-            JOptionPane.showMessageDialog(this, "Selecciona un paciente", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
         String patientId = selectedPatient.split(" - ")[0];
         AppointmentController controller = new AppointmentController();
         Response response = controller.getPatientAppointments(patientId);
@@ -965,10 +929,6 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
         String duration = jTextField28.getText();
         String instructions = jTextField29.getText();
         String frequency = jTextField27.getText();
-        if (appointmentId == null || appointmentId.equals("Select one") || medicationName.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Completa los campos requeridos", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
         model.addRow(new Object[]{appointmentId, medicationName, dose, adminRoute, duration, instructions, frequency});
     }
 
@@ -976,10 +936,6 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
         // Prescribir el medicamento seleccionado en la tabla
         DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
         int selectedRow = jTable1.getSelectedRow();
-        if (selectedRow < 0) {
-            JOptionPane.showMessageDialog(this, "Selecciona un medicamento de la tabla", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
         String appointmentId = (String) model.getValueAt(selectedRow, 0);
         String medicationName = (String) model.getValueAt(selectedRow, 1);
         double dose = Double.parseDouble((String) model.getValueAt(selectedRow, 2));

@@ -415,9 +415,9 @@ public class LoginView extends javax.swing.JFrame {
             } else if (role.equals("DOCTOR")) {
                 new DoctorView(data).setVisible(true);
             } else if (role.equals("PATIENT")) {
-                HashMap<String, Object> patientData = new HashMap<>();
-                patientData.put("role", "PATIENT");
-                new AdminView(patientData).setVisible(true);
+                long patientId = ((Number) data.get("id")).longValue();
+                Patient pat = StorageHospital.getInstance().getPatient(patientId);
+                new PatientView(pat, false).setVisible(true);
             }
 
             this.dispose();

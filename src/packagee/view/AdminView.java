@@ -418,10 +418,6 @@ public class AdminView extends javax.swing.JFrame implements Observer {
         // Registrar doctor
         DoctorController controller = new DoctorController();
         String selectedSpec = (String) cmbSpecialty.getSelectedItem();
-        if (selectedSpec == null || selectedSpec.equals("Select one")) {
-            JOptionPane.showMessageDialog(this, "Selecciona una especialidad", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
         Response response = controller.registerDoctor(
                 txtId.getText(),
                 txtUser.getText(),
@@ -436,7 +432,6 @@ public class AdminView extends javax.swing.JFrame implements Observer {
         if (response.isSuccess()) {
             JOptionPane.showMessageDialog(this, response.getMessage(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
             loadComboBoxes();
-            // Limpiar formulario
             txtId.setText("");
             txtFirstName.setText("");
             txtLastName.setText("");
@@ -452,16 +447,10 @@ public class AdminView extends javax.swing.JFrame implements Observer {
 
     private void btnDoctorViewActionPerformed(java.awt.event.ActionEvent evt) {
         String selectedDoctor = (String) cmbDoctor.getSelectedItem();
-        if (selectedDoctor == null || selectedDoctor.equals("Select one")) {
-            JOptionPane.showMessageDialog(this, "Selecciona un doctor", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        
         long doctorId = Long.parseLong(selectedDoctor.split(" - ")[0]);
         packagee.model.Doctor doc = StorageHospital.getInstance().getDoctor(doctorId);
-        if (doc == null) {
-            JOptionPane.showMessageDialog(this, "Doctor no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+       
         HashMap<String, Object> docData = doc.serialize();
         docData.put("role", "DOCTOR");
         new DoctorView(docData, true).setVisible(true);
@@ -476,16 +465,10 @@ public class AdminView extends javax.swing.JFrame implements Observer {
 
     private void btnPatientViewActionPerformed(java.awt.event.ActionEvent evt) {
         String selectedPatient = (String) cmbPatient.getSelectedItem();
-        if (selectedPatient == null || selectedPatient.equals("Select one")) {
-            JOptionPane.showMessageDialog(this, "Selecciona un paciente", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+       
         long patientId = Long.parseLong(selectedPatient.split(" - ")[0]);
         packagee.model.Patient pat = StorageHospital.getInstance().getPatient(patientId);
-        if (pat == null) {
-            JOptionPane.showMessageDialog(this, "Paciente no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+       
         new PatientView(pat, true).setVisible(true);
         this.dispose();
     }

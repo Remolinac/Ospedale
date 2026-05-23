@@ -17,14 +17,9 @@ public class Main {
 
     public static void main(String[] args) {
 
-        JSONLoader.loadUsers("json/users.json");
+        JSONLoader.loadUsers("src/Users/UsersJSON.json");
 
         packagee.model.storage.StorageHospital storage = packagee.model.storage.StorageHospital.getInstance();
-        System.out.println("Admin cargado: " + storage.getAdmin());
-        if (storage.getAdmin() != null) {
-            System.out.println("Username: " + storage.getAdmin().getUsername());
-            System.out.println("Password: " + storage.getAdmin().getPassword());
-        }
 
         System.setProperty("flatlaf.useNativeLibrary", "false");
 

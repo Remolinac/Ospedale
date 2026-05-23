@@ -583,11 +583,6 @@ public class PatientView extends javax.swing.JFrame implements Observer {
 
     private void btnCreateActionPerformed() {
         String selected = (String) cmbSelectDoctor.getSelectedItem();
-        if (selected == null || "Select one".equals(selected)) {
-            lblAppointmentError.setForeground(Color.RED);
-            lblAppointmentError.setText("Selecciona especialidad o doctor");
-            return;
-        }
         Response r;
         if (radiobtnDoctor.isSelected()) {
             String doctorId = selected.split(" - ")[0].trim();
@@ -621,11 +616,6 @@ public class PatientView extends javax.swing.JFrame implements Observer {
 
     private void btnCreateHospiActionPerformed() {
         String selected = (String) cmbAttendingDoctor.getSelectedItem();
-        if (selected == null || "Select one".equals(selected)) {
-            lblHospiError.setForeground(Color.RED);
-            lblHospiError.setText("Selecciona un doctor");
-            return;
-        }
         String doctorId = selected.split(" - ")[0].trim();
         String roomType = (String) cmbRoomType.getSelectedItem();
         Response r = hospitalizationController.requestHospitalization(
@@ -651,11 +641,6 @@ public class PatientView extends javax.swing.JFrame implements Observer {
 
     private void btnCancelActionPerformed() {
         String appointmentId = (String) cmbAppointmentCancel.getSelectedItem();
-        if (appointmentId == null || "Select one".equals(appointmentId)) {
-            lblCancelError.setForeground(Color.RED);
-            lblCancelError.setText("Selecciona una cita");
-            return;
-        }
         Response r = appointmentController.cancelAppointment(
                 appointmentId, String.valueOf(patient.getId()));
         if (r.isSuccess()) {
