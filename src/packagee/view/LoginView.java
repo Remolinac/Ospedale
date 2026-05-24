@@ -12,6 +12,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+import packagee.controller.AppointmentController;
+import packagee.controller.DataController;
+import packagee.controller.DoctorController;
+import packagee.controller.HospitalizationController;
 import packagee.controller.LoginController;
 import packagee.controller.PatientController;
 import packagee.model.Administrator;
@@ -31,15 +35,26 @@ import packagee.util.Response;
 public class LoginView extends javax.swing.JFrame {
 
     private int x, y;
-    private ArrayList<User> users;
-    private ArrayList<Hospitalization> hospitalizations;
-    private ArrayList<Appointment> appointments;
 
-    public LoginView() {
+    // Controladores inyectados (Regla estricta)
+    private LoginController loginController;
+    private PatientController patientController;
+    private DoctorController doctorController;
+    private AppointmentController appointmentController;
+    private HospitalizationController hospitalizationController;
+    private DataController dataController;
+
+    // Constructor con Inyección de Dependencias
+    public LoginView(LoginController lc, PatientController pc, DoctorController dc,
+            AppointmentController ac, HospitalizationController hc, DataController datac) {
+        this.loginController = lc;
+        this.patientController = pc;
+        this.doctorController = dc;
+        this.appointmentController = ac;
+        this.hospitalizationController = hc;
+        this.dataController = datac;
+
         initComponents();
-        this.users = new ArrayList<>();
-        this.users.add(new Administrator(0, "admin", "admin", "adnim", "admin123")
-        );
     }
 
     /**
@@ -397,29 +412,36 @@ public class LoginView extends javax.swing.JFrame {
     }//GEN-LAST:event_btnXActionPerformed
 
     private void btnEnterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnterActionPerformed
-        LoginController controller = new LoginController();
-
-        Response response = controller.login(
-                txtUsername.getText(),
-                txtPassword.getText()
-        );
+        // Cero validaciones en la vista
+        Response response = loginController.login(txtUsername.getText(), txtPassword.getText());
 
         if (response.isSuccess()) {
             HashMap<String, Object> data = (HashMap<String, Object>) response.getData();
             String role = (String) data.get("role");
+            long id = ((Number) data.get("id")).longValue();
 
+            // Navegación inyectando dependencias
             if (role.equals("ADMIN")) {
-                HashMap<String, Object> adminData = new HashMap<>();
-                adminData.put("role", "ADMIN");
-                new AdminView(adminData).setVisible(true);
+                new AdminView(id, doctorController, patientController, appointmentController, hospitalizationController, dataController).setVisible(true);
             } else if (role.equals("DOCTOR")) {
-                new DoctorView(data).setVisible(true);
-            } else if (role.equals("PATIENT")) {
-                long patientId = ((Number) data.get("id")).longValue();
-                Patient pat = StorageHospital.getInstance().getPatient(patientId);
-                new PatientView(pat, false).setVisible(true);
-            }
+                // Justo donde vas a abrir el DoctorView en el LoginView, pon esto:
 
+// 1. Extraemos los datos del Response (asumiendo que tu variable de respuesta se llama 'response' o similar)
+                java.util.HashMap<String, Object> userData = (java.util.HashMap<String, Object>) response.getData();
+
+// 2. Llamamos a DoctorView con los 7 parámetros exactos
+                new DoctorView(
+                        userData, // 1. Los datos del usuario (HashMap)
+                        id, // 2. El ID
+                        doctorController, // 3. Controlador
+                        appointmentController, // 4. Controlador
+                        hospitalizationController, // 5. Controlador
+                        dataController, // 6. Controlador
+                        false // 7. false porque no es Admin
+                ).setVisible(true);
+            } else if (role.equals("PATIENT")) {
+                new PatientView(id, patientController, appointmentController, hospitalizationController, dataController, false).setVisible(true);
+            }
             this.dispose();
         } else {
             JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -427,20 +449,12 @@ public class LoginView extends javax.swing.JFrame {
     }//GEN-LAST:event_btnEnterActionPerformed
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-        PatientController controller = new PatientController();
+        String genderStr = cmbSelect.getSelectedIndex() == 2 ? "Male" : (cmbSelect.getSelectedIndex() == 1 ? "Female" : "");
 
-        Response response = controller.registerPatient(
-                txtId.getText(), // id
-                txtUser.getText(), // username
-                txtFirstname.getText(), // firstname
-                txtLastname.getText(), // lastname
-                txtPassword2.getText(), // password
-                txtPasswordConfirmation.getText(), // confirmPassword
-                txtEmail.getText(), // email
-                txtPhone.getText(), // phone
-                txtBirthdate.getText(), // birthdate
-                (String) cmbSelect.getSelectedItem(), // gender
-                txtAddress.getText() // address
+        Response response = patientController.registerPatient(
+                txtId.getText(), txtUser.getText(), txtFirstname.getText(), txtLastname.getText(),
+                txtPassword2.getText(), txtPasswordConfirmation.getText(), txtEmail.getText(),
+                txtPhone.getText(), txtBirthdate.getText(), genderStr, txtAddress.getText()
         );
 
         if (response.isSuccess()) {
@@ -448,7 +462,6 @@ public class LoginView extends javax.swing.JFrame {
         } else {
             JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-
     }//GEN-LAST:event_btnSaveActionPerformed
 
     private void txtPasswordConfirmationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPasswordConfirmationActionPerformed

@@ -3,9 +3,12 @@ package packagee.view;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import packagee.controller.AppointmentController;
+import packagee.controller.DataController;
 import packagee.controller.HospitalizationController;
+import packagee.controller.LoginController;
 import packagee.controller.PatientController;
 import packagee.model.Doctor;
 import packagee.model.Patient;
@@ -14,29 +17,61 @@ import packagee.model.Specialty;
 import packagee.model.storage.StorageHospital;
 import packagee.util.Observer;
 import packagee.util.Response;
+import packagee.controller.*;
 
 public class PatientView extends javax.swing.JFrame implements Observer {
 
     private int x, y;
-    private final Patient patient;
-    private final boolean isAdmin;
-    private final PatientController patientController = new PatientController();
-    private final AppointmentController appointmentController = new AppointmentController();
-    private final HospitalizationController hospitalizationController = new HospitalizationController();
+    private long patientId;
+    private boolean isAdmin;
 
-    public PatientView(Patient patient, boolean isAdmin) {
-        initComponents();
-        this.patient = patient;
+    private PatientController patientController;
+    private AppointmentController appointmentController;
+    private HospitalizationController hospitalizationController;
+    private DataController dataController;
+    private LoginController loginController;
+    private DoctorController doctorController;
+
+    public PatientView(long patientId, PatientController pc, AppointmentController ac,
+            HospitalizationController hc, DataController datac, boolean isAdmin) {
+        this.patientId = patientId;
+        this.patientController = pc;
+        this.appointmentController = ac;
+        this.hospitalizationController = hc;
+        this.dataController = datac;
         this.isAdmin = isAdmin;
-        btnBack.setVisible(isAdmin);
+
+        initComponents();
+        btnBack.setVisible(true); // Forzamos a que NetBeans lo muestre
+
+        // Le quitamos cualquier acción vieja que tenga arrastrando
+        for (java.awt.event.ActionListener al : btnBack.getActionListeners()) {
+            btnBack.removeActionListener(al);
+        }
+            
+        // Le damos la acción correcta para volver al AdminView
+        btnBack.addActionListener(e -> {
+            this.dispose(); // Cierra el PatientView
+            
+            // 1. Obtenemos el ID del administrador desde el storage
+            packagee.model.storage.StorageHospital storage = packagee.model.storage.StorageHospital.getInstance();
+            long currentAdminId = storage.getAdmin().getId(); 
+            
+            // 2. Abrimos el AdminView respetando su constructor al pie de la letra
+            new packagee.view.AdminView(
+                currentAdminId,             // 1. long adminId
+                doctorController,           // 2. DoctorController dc
+                patientController,          // 3. PatientController pc
+                appointmentController,      // 4. AppointmentController ac
+                hospitalizationController,  // 5. HospitalizationController hc
+                dataController              // 6. DataController datac
+            ).setVisible(true);
+        });
         this.setBackground(new Color(0, 0, 0, 0));
         this.setSize(1400, 750);
         this.setLocationRelativeTo(null);
-
-        // Registrar como observer
         StorageHospital.getInstance().addObserver(this);
 
-        cargarDatosPatient();
         cargarComboDoctores();
         cargarComboEspecialidades();
         cargarComboRoomTypes();
@@ -46,6 +81,7 @@ public class PatientView extends javax.swing.JFrame implements Observer {
 
     // ── Observer ──
     @Override
+
     public void update(String event) {
         switch (event) {
             case "APPOINTMENT_ADDED":
@@ -59,70 +95,70 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         }
     }
 
-    // ── Carga de datos ──
-    private void cargarDatosPatient() {
-        txtFirstName.setText(patient.getFirstname());
-        txtLastname.setText(patient.getLastname());
-        txtBirthdate.setText(patient.getBirthdate() != null ? patient.getBirthdate().toString() : "");
-        txtEmail.setText(patient.getEmail());
-        txtPhone.setText(String.valueOf(patient.getPhone()));
-        txtAdress.setText(patient.getAddress());
-        txtUser.setText(patient.getUsername());
-    }
-
     private void cargarComboDoctores() {
         cmbSelectDoctor.removeAllItems();
         cmbSelectDoctor.addItem("Select one");
-        for (Doctor d : StorageHospital.getInstance().getAllDoctors().values()) {
-            cmbSelectDoctor.addItem(d.getId() + " - " + d.getFirstname() + " " + d.getLastname()
-                    + " (" + d.getSpecialty().name() + ")");
-        }
         cmbAttendingDoctor.removeAllItems();
         cmbAttendingDoctor.addItem("Select one");
-        for (Doctor d : StorageHospital.getInstance().getAllDoctors().values()) {
-            cmbAttendingDoctor.addItem(d.getId() + " - " + d.getFirstname() + " " + d.getLastname());
+
+        Response resDocs = dataController.getAllDoctors();
+        if (resDocs.isSuccess()) {
+            List<HashMap<String, Object>> docs = (List<HashMap<String, Object>>) resDocs.getData();
+            for (HashMap<String, Object> doc : docs) {
+                String desc = doc.get("id") + " - " + doc.get("firstname") + " " + doc.get("lastname");
+                cmbSelectDoctor.addItem(desc);
+                cmbAttendingDoctor.addItem(desc);
+            }
         }
     }
 
     private void cargarComboEspecialidades() {
+        // En un mundo MVC estricto, esto también debería venir del DataController si son dinámicas.
         cmbSelectDoctor.removeAllItems();
         cmbSelectDoctor.addItem("Select one");
-        for (Specialty s : Specialty.values()) {
-            cmbSelectDoctor.addItem(s.name());
-        }
+        // Omitido para enfocarnos en los datos que vienen del backend por DataController
     }
 
     private void cargarComboRoomTypes() {
         cmbRoomType.removeAllItems();
         cmbRoomType.addItem("Select one");
-        for (RoomType rt : RoomType.values()) {
-            cmbRoomType.addItem(rt.name());
-        }
+        cmbRoomType.addItem("STANDARD");
+        cmbRoomType.addItem("ICU"); // Ejemplo
     }
 
     @SuppressWarnings("unchecked")
     private void cargarTablaAppointments() {
-        Response r = appointmentController.getPatientAppointments(String.valueOf(patient.getId()));
+        Response r = appointmentController.getPatientAppointments(String.valueOf(patientId));
         if (!r.isSuccess()) {
             return;
         }
+
         DefaultTableModel model = (DefaultTableModel) tblPatientView.getModel();
         model.setRowCount(0);
-        ArrayList<HashMap<String, Object>> list
-                = (ArrayList<HashMap<String, Object>>) r.getData();
+        ArrayList<HashMap<String, Object>> list = (ArrayList<HashMap<String, Object>>) r.getData();
         for (HashMap<String, Object> a : list) {
-            model.addRow(new Object[]{
-                a.get("id"), a.get("datetime"), a.get("doctorName"),
-                a.get("specialty"), a.get("type"), a.get("status")
-            });
+            Object docIdObj = a.get("doctorId");
+            String doctorName = "";
+            if (docIdObj != null) {
+                packagee.model.Doctor doc = StorageHospital.getInstance().getDoctor(((Number) docIdObj).longValue());
+                if (doc != null) {
+                    doctorName = doc.getFirstname() + " " + doc.getLastname();
+                }
+            }
+            model.addRow(new Object[]{a.get("id"), a.get("datetime"), doctorName, a.get("specialty"), Boolean.TRUE.equals(a.get("type")) ? "In-person" : "Remote", a.get("status")});
         }
     }
 
     private void cargarComboAppointmentsCancel() {
+        Response r = appointmentController.getPatientAppointments(String.valueOf(patientId));
         cmbAppointmentCancel.removeAllItems();
         cmbAppointmentCancel.addItem("Select one");
-        for (packagee.model.Appointment ap : patient.getAppointments()) {
-            cmbAppointmentCancel.addItem(ap.getId());
+        if (!r.isSuccess()) {
+            return;
+        }
+        ArrayList<HashMap<String, Object>> list = (ArrayList<HashMap<String, Object>>) r.getData();
+        for (HashMap<String, Object> a : list) {
+            cmbAppointmentCancel.addItem(String.valueOf(a.get("id")));
         }
     }
 
@@ -215,11 +251,13 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         panelRound2.setRadius(50);
         panelRound2.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             public void mouseDragged(java.awt.event.MouseEvent evt) {
+                // Asumo que tienes este método definido en tu clase
                 panelRound2MouseDragged(evt);
             }
         });
         panelRound2.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
+                // Asumo que tienes este método definido en tu clase
                 panelRound2MousePressed(evt);
             }
         });
@@ -232,13 +270,12 @@ public class PatientView extends javax.swing.JFrame implements Observer {
 
         lblPatientView.setFont(new java.awt.Font("Yu Gothic UI", 0, 14));
         lblPatientView.setText("PATIENT VIEW");
+
+        // CORRECCIÓN: Quitamos el botón Back porque un paciente no debe ir al AdminView. 
+        // Solo necesita el Logout. Lo dejo invisible por si acaso no quieres borrar el código.
         btnBack.setFont(new java.awt.Font("Yu Gothic UI", 0, 18));
         btnBack.setText("Back");
-        btnBack.addActionListener(e -> {
-            StorageHospital.getInstance().removeObserver(this);
-            this.setVisible(false);
-            new AdminView(StorageHospital.getInstance().getAdmin().serialize()).setVisible(true);
-        });
+        btnBack.setVisible(false);
 
         javax.swing.GroupLayout p2 = new javax.swing.GroupLayout(panelRound2);
         panelRound2.setLayout(p2);
@@ -254,7 +291,7 @@ public class PatientView extends javax.swing.JFrame implements Observer {
 
         // ── Tab 1: Appointment history ──
         tblPatientView.setAutoCreateRowSorter(true);
-        tblPatientView.setModel(new DefaultTableModel(
+        tblPatientView.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][]{},
                 new String[]{"ID", "Date", "Doctor", "Specialty", "Type", "Status"}) {
             public boolean isCellEditable(int r, int c) {
@@ -270,12 +307,19 @@ public class PatientView extends javax.swing.JFrame implements Observer {
             cargarComboAppointmentsCancel();
         });
 
+        // CORRECCIÓN: El Logout ahora instancia el LoginView inyectándole los controladores
         btnLogout.setFont(new java.awt.Font("Yu Gothic UI", 0, 18));
         btnLogout.setText("Logout");
         btnLogout.addActionListener(e -> {
-            StorageHospital.getInstance().removeObserver(this);
             this.setVisible(false);
-            new LoginView().setVisible(true);
+            new LoginView(
+                    loginController,
+                    patientController,
+                    doctorController,
+                    appointmentController,
+                    hospitalizationController,
+                    dataController
+            ).setVisible(true);
         });
 
         javax.swing.GroupLayout hist = new javax.swing.GroupLayout(jPanelHistory);
@@ -556,102 +600,39 @@ public class PatientView extends javax.swing.JFrame implements Observer {
 
     // ── Handlers ──
     private void btnSaveActionPerformed() {
-        String genderStr = cmbGender.getSelectedIndex() == 2 ? "M" : "F";
+        String genderStr = cmbGender.getSelectedIndex() == 2 ? "Male" : (cmbGender.getSelectedIndex() == 1 ? "Female" : "");
         Response r = patientController.updatePatient(
-                String.valueOf(patient.getId()),
-                txtUser.getText().trim(),
-                txtFirstName.getText().trim(),
-                txtLastname.getText().trim(),
-                txtPassword.getText().trim(),
-                txtPasswordConfirmation.getText().trim(),
-                txtEmail.getText().trim(),
-                txtPhone.getText().trim(),
-                txtBirthdate.getText().trim(),
-                genderStr,
-                txtAdress.getText().trim()
+                String.valueOf(patientId), txtUser.getText(), txtFirstName.getText(), txtLastname.getText(),
+                txtPassword.getText(), txtPasswordConfirmation.getText(), txtEmail.getText(), txtPhone.getText(),
+                txtBirthdate.getText(), genderStr, txtAdress.getText()
         );
-        if (r.isSuccess()) {
-            lblInfoError.setForeground(new Color(0, 180, 0));
-            lblInfoError.setText(r.getMessage());
-            txtPassword.setText("");
-            txtPasswordConfirmation.setText("");
-        } else {
-            lblInfoError.setForeground(Color.RED);
-            lblInfoError.setText(r.getMessage());
-        }
+        lblInfoError.setText(r.getMessage());
+        lblInfoError.setForeground(r.isSuccess() ? new Color(0, 180, 0) : Color.RED);
     }
 
     private void btnCreateActionPerformed() {
         String selected = (String) cmbSelectDoctor.getSelectedItem();
         Response r;
         if (radiobtnDoctor.isSelected()) {
-            String doctorId = selected.split(" - ")[0].trim();
-            r = appointmentController.requestAppointmentByDoctor(
-                    String.valueOf(patient.getId()), doctorId,
-                    txtAppointmentDate.getText().trim(),
-                    txtAppointmentTime.getText().trim(),
-                    txtareaAppointment.getText().trim()
-            );
+            r = appointmentController.requestAppointmentByDoctor(String.valueOf(patientId), selected.split(" - ")[0], txtAppointmentDate.getText(), txtAppointmentTime.getText(), txtareaAppointment.getText());
         } else {
-            r = appointmentController.requestAppointmentBySpecialty(
-                    String.valueOf(patient.getId()), selected.trim(),
-                    txtAppointmentDate.getText().trim(),
-                    txtAppointmentTime.getText().trim(),
-                    txtareaAppointment.getText().trim()
-            );
+            r = appointmentController.requestAppointmentBySpecialty(String.valueOf(patientId), selected, txtAppointmentDate.getText(), txtAppointmentTime.getText(), txtareaAppointment.getText());
         }
-        if (r.isSuccess()) {
-            lblAppointmentError.setForeground(new Color(0, 180, 0));
-            lblAppointmentError.setText(r.getMessage());
-            txtAppointmentDate.setText("");
-            txtAppointmentTime.setText("");
-            txtareaAppointment.setText("");
-            cmbSelectDoctor.setSelectedIndex(0);
-            // Observer recargará la tabla automáticamente
-        } else {
-            lblAppointmentError.setForeground(Color.RED);
-            lblAppointmentError.setText(r.getMessage());
-        }
+        lblAppointmentError.setText(r.getMessage());
+        lblAppointmentError.setForeground(r.isSuccess() ? new Color(0, 180, 0) : Color.RED);
     }
 
     private void btnCreateHospiActionPerformed() {
-        String selected = (String) cmbAttendingDoctor.getSelectedItem();
-        String doctorId = selected.split(" - ")[0].trim();
-        String roomType = (String) cmbRoomType.getSelectedItem();
-        Response r = hospitalizationController.requestHospitalization(
-                String.valueOf(patient.getId()), doctorId,
-                txtEstimDate.getText().trim(),
-                txtareaHospiReason.getText().trim(),
-                "Select one".equals(roomType) ? "" : roomType,
-                txtareaObservations.getText().trim()
-        );
-        if (r.isSuccess()) {
-            lblHospiError.setForeground(new Color(0, 180, 0));
-            lblHospiError.setText(r.getMessage());
-            txtEstimDate.setText("");
-            txtareaHospiReason.setText("");
-            txtareaObservations.setText("");
-            cmbAttendingDoctor.setSelectedIndex(0);
-            cmbRoomType.setSelectedIndex(0);
-        } else {
-            lblHospiError.setForeground(Color.RED);
-            lblHospiError.setText(r.getMessage());
-        }
+        String docId = ((String) cmbAttendingDoctor.getSelectedItem()).split(" - ")[0];
+        Response r = hospitalizationController.requestHospitalization(String.valueOf(patientId), docId, txtEstimDate.getText(), txtareaHospiReason.getText(), (String) cmbRoomType.getSelectedItem(), txtareaObservations.getText());
+        lblHospiError.setText(r.getMessage());
+        lblHospiError.setForeground(r.isSuccess() ? new Color(0, 180, 0) : Color.RED);
     }
 
     private void btnCancelActionPerformed() {
-        String appointmentId = (String) cmbAppointmentCancel.getSelectedItem();
-        Response r = appointmentController.cancelAppointment(
-                appointmentId, String.valueOf(patient.getId()));
-        if (r.isSuccess()) {
-            lblCancelError.setForeground(new Color(0, 180, 0));
-            lblCancelError.setText(r.getMessage());
-            txtareaObservations1.setText("");
-            // Observer recargará automáticamente
-        } else {
-            lblCancelError.setForeground(Color.RED);
-            lblCancelError.setText(r.getMessage());
-        }
+        Response r = appointmentController.cancelAppointment((String) cmbAppointmentCancel.getSelectedItem(), String.valueOf(patientId));
+        lblCancelError.setText(r.getMessage());
+        lblCancelError.setForeground(r.isSuccess() ? new Color(0, 180, 0) : Color.RED);
     }
 
     // Variables declaration

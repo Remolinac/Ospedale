@@ -24,30 +24,25 @@ import packagee.util.Validator;
  */
 public class HospitalizationController {
 
+    private final StorageHospital storage;
+
+    // Inyección de dependencias
+    public HospitalizationController(StorageHospital storage) {
+        this.storage = storage;
+    }
+
     public Response requestHospitalization(String patientId, String doctorId,
             String date, String reason, String roomType, String observations) {
 
-        if (!Validator.isValidDate(date)) {
-            return new Response(false, "La fecha no es válida, use el formato AAAA-MM-DD", null);
-        }
-        if (reason == null || reason.trim().isEmpty()) {
-            return new Response(false, "La razón no puede estar vacía", null);
-        }
-        if (roomType == null || roomType.trim().isEmpty()) {
-            return new Response(false, "El tipo de habitación no puede estar vacío", null);
-        }
-
-        StorageHospital storage = StorageHospital.getInstance();
+        if (!Validator.isValidDate(date)) return new Response(false, "La fecha no es válida, use el formato AAAA-MM-DD", null);
+        if (reason == null || reason.trim().isEmpty()) return new Response(false, "La razón no puede estar vacía", null);
+        if (roomType == null || roomType.trim().isEmpty() || roomType.equals("Select one")) return new Response(false, "El tipo de habitación no puede estar vacío", null);
 
         Patient patient = storage.getPatient(Long.parseLong(patientId));
-        if (patient == null) {
-            return new Response(false, "No existe un paciente con ese ID", null);
-        }
+        if (patient == null) return new Response(false, "No existe un paciente con ese ID", null);
 
         Doctor doctor = storage.getDoctor(Long.parseLong(doctorId));
-        if (doctor == null) {
-            return new Response(false, "No existe un doctor con ese ID", null);
-        }
+        if (doctor == null) return new Response(false, "No existe un doctor con ese ID", null);
 
         RoomType roomTypeEnum;
         try {
@@ -65,40 +60,22 @@ public class HospitalizationController {
     }
 
     public Response approveHospitalization(String hospitalizationId, String doctorId) {
-
-        if (hospitalizationId == null || hospitalizationId.trim().isEmpty()) {
-            return new Response(false, "El ID de la hospitalización no puede estar vacío", null);
-        }
-
-        StorageHospital storage = StorageHospital.getInstance();
+        if (hospitalizationId == null || hospitalizationId.trim().isEmpty() || hospitalizationId.equals("Select one")) return new Response(false, "El ID de la hospitalización no puede estar vacío", null);
 
         Hospitalization hospitalization = storage.getHospitalization(hospitalizationId);
-        if (hospitalization == null) {
-            return new Response(false, "No existe una hospitalización con ese ID", null);
-        }
-        if (hospitalization.getStatus() != HospitalizationStatus.REQUESTED) {
-            return new Response(false, "La hospitalización debe estar en estado REQUESTED para ser aprobada", null);
-        }
+        if (hospitalization == null) return new Response(false, "No existe una hospitalización con ese ID", null);
+        if (hospitalization.getStatus() != HospitalizationStatus.REQUESTED) return new Response(false, "La hospitalización debe estar en estado REQUESTED para ser aprobada", null);
 
         hospitalization.setStatus(HospitalizationStatus.ONGOING);
         return new Response(true, "Hospitalización aprobada correctamente", hospitalization.serialize());
     }
 
     public Response denyHospitalization(String hospitalizationId, String doctorId) {
-
-        if (hospitalizationId == null || hospitalizationId.trim().isEmpty()) {
-            return new Response(false, "El ID de la hospitalización no puede estar vacío", null);
-        }
-
-        StorageHospital storage = StorageHospital.getInstance();
+        if (hospitalizationId == null || hospitalizationId.trim().isEmpty() || hospitalizationId.equals("Select one")) return new Response(false, "El ID de la hospitalización no puede estar vacío", null);
 
         Hospitalization hospitalization = storage.getHospitalization(hospitalizationId);
-        if (hospitalization == null) {
-            return new Response(false, "No existe una hospitalización con ese ID", null);
-        }
-        if (hospitalization.getStatus() != HospitalizationStatus.REQUESTED) {
-            return new Response(false, "La hospitalización debe estar en estado REQUESTED para ser denegada", null);
-        }
+        if (hospitalization == null) return new Response(false, "No existe una hospitalización con ese ID", null);
+        if (hospitalization.getStatus() != HospitalizationStatus.REQUESTED) return new Response(false, "La hospitalización debe estar en estado REQUESTED para ser denegada", null);
 
         hospitalization.setStatus(HospitalizationStatus.CANCELED);
         return new Response(true, "Solicitud de hospitalización denegada correctamente", hospitalization.serialize());
@@ -107,28 +84,14 @@ public class HospitalizationController {
     public Response hospitalizeFromAppointment(String appointmentId, String doctorId,
             String date, String reason, String roomType, String observations) {
 
-        if (appointmentId == null || appointmentId.trim().isEmpty()) {
-            return new Response(false, "El ID de la cita no puede estar vacío", null);
-        }
-        if (!Validator.isValidDate(date)) {
-            return new Response(false, "La fecha no es válida, use el formato AAAA-MM-DD", null);
-        }
-        if (reason == null || reason.trim().isEmpty()) {
-            return new Response(false, "La razón no puede estar vacía", null);
-        }
-        if (roomType == null || roomType.trim().isEmpty()) {
-            return new Response(false, "El tipo de habitación no puede estar vacío", null);
-        }
-
-        StorageHospital storage = StorageHospital.getInstance();
+        if (appointmentId == null || appointmentId.trim().isEmpty() || appointmentId.equals("Select one")) return new Response(false, "El ID de la cita no puede estar vacío", null);
+        if (!Validator.isValidDate(date)) return new Response(false, "La fecha no es válida, use el formato AAAA-MM-DD", null);
+        if (reason == null || reason.trim().isEmpty()) return new Response(false, "La razón no puede estar vacía", null);
+        if (roomType == null || roomType.trim().isEmpty() || roomType.equals("Select one")) return new Response(false, "El tipo de habitación no puede estar vacío", null);
 
         Appointment appointment = storage.getAppointment(appointmentId);
-        if (appointment == null) {
-            return new Response(false, "No existe una cita con ese ID", null);
-        }
-        if (appointment.getStatus() != AppointmentStatus.PENDING) {
-            return new Response(false, "La cita debe estar en estado PENDING para hospitalizar desde ella", null);
-        }
+        if (appointment == null) return new Response(false, "No existe una cita con ese ID", null);
+        if (appointment.getStatus() != AppointmentStatus.PENDING) return new Response(false, "La cita debe estar en estado PENDING para hospitalizar desde ella", null);
 
         RoomType roomTypeEnum;
         try {
@@ -140,9 +103,7 @@ public class HospitalizationController {
         appointment.setStatus(AppointmentStatus.COMPLETED);
 
         Doctor doctor = storage.getDoctor(Long.parseLong(doctorId));
-        if (doctor == null) {
-            return new Response(false, "No existe un doctor con ese ID", null);
-        }
+        if (doctor == null) return new Response(false, "No existe un doctor con ese ID", null);
 
         Hospitalization hospitalization = new Hospitalization(
                 appointment.getPatient(), doctor,
@@ -155,17 +116,10 @@ public class HospitalizationController {
     }
 
     public Response getHospitalizations(String patientId) {
-
-        if (patientId == null || patientId.trim().isEmpty()) {
-            return new Response(false, "El ID del paciente no puede estar vacío", null);
-        }
-
-        StorageHospital storage = StorageHospital.getInstance();
+        if (patientId == null || patientId.trim().isEmpty()) return new Response(false, "El ID del paciente no puede estar vacío", null);
 
         Patient patient = storage.getPatient(Long.parseLong(patientId));
-        if (patient == null) {
-            return new Response(false, "No existe un paciente con ese ID", null);
-        }
+        if (patient == null) return new Response(false, "No existe un paciente con ese ID", null);
 
         ArrayList<HashMap<String, Object>> serialized = new ArrayList<>();
         for (Hospitalization h : storage.getAllHospitalizations().values()) {

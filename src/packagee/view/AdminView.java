@@ -5,9 +5,14 @@
 package packagee.view;
 
 import java.util.HashMap;
+import java.util.List;
 import javax.swing.JOptionPane;
+import packagee.controller.AppointmentController;
 import packagee.controller.DataController;
 import packagee.controller.DoctorController;
+import packagee.controller.HospitalizationController;
+import packagee.controller.LoginController;
+import packagee.controller.PatientController;
 import packagee.model.Specialty;
 import packagee.model.storage.StorageHospital;
 import packagee.util.Observer;
@@ -20,11 +25,24 @@ import packagee.util.Response;
 public class AdminView extends javax.swing.JFrame implements Observer {
 
     private int x, y;
-    private HashMap<String, Object> userData;
+    private long adminId;
 
-    public AdminView(HashMap<String, Object> userData) {
+    // Controladores inyectados
+    private DoctorController doctorController;
+    private PatientController patientController; // Añadido para poder inyectarlo en PatientView
+    private AppointmentController appointmentController;
+    private HospitalizationController hospitalizationController;
+    private DataController dataController;
+
+    public AdminView(long adminId, DoctorController dc, PatientController pc, AppointmentController ac, HospitalizationController hc, DataController datac) {
+        this.adminId = adminId;
+        this.doctorController = dc;
+        this.patientController = pc;
+        this.appointmentController = ac;
+        this.hospitalizationController = hc;
+        this.dataController = datac;
+
         initComponents();
-        this.userData = userData;
         loadComboBoxes();
         this.setSize(1400, 717);
         this.setLocationRelativeTo(null);
@@ -32,18 +50,24 @@ public class AdminView extends javax.swing.JFrame implements Observer {
     }
 
     private void loadComboBoxes() {
-        StorageHospital storage = StorageHospital.getInstance();
-
         cmbDoctor.removeAllItems();
         cmbDoctor.addItem("Select one");
-        for (packagee.model.Doctor doc : storage.getAllDoctors().values()) {
-            cmbDoctor.addItem(doc.getId() + " - " + doc.getFirstname() + " " + doc.getLastname());
+        Response resDocs = dataController.getAllDoctors();
+        if (resDocs.isSuccess()) {
+            List<HashMap<String, Object>> docs = (List<HashMap<String, Object>>) resDocs.getData();
+            for (HashMap<String, Object> doc : docs) {
+                cmbDoctor.addItem(doc.get("id") + " - " + doc.get("firstname") + " " + doc.get("lastname"));
+            }
         }
 
         cmbPatient.removeAllItems();
         cmbPatient.addItem("Select one");
-        for (packagee.model.Patient p : storage.getAllPatients().values()) {
-            cmbPatient.addItem(p.getId() + " - " + p.getFirstname() + " " + p.getLastname());
+        Response resPats = dataController.getAllPatients();
+        if (resPats.isSuccess()) {
+            List<HashMap<String, Object>> pats = (List<HashMap<String, Object>>) resPats.getData();
+            for (HashMap<String, Object> p : pats) {
+                cmbPatient.addItem(p.get("id") + " - " + p.get("firstname") + " " + p.get("lastname"));
+            }
         }
     }
 
@@ -415,23 +439,15 @@ public class AdminView extends javax.swing.JFrame implements Observer {
     }
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {
-        // Registrar doctor
-        DoctorController controller = new DoctorController();
         String selectedSpec = (String) cmbSpecialty.getSelectedItem();
-        Response response = controller.registerDoctor(
-                txtId.getText(),
-                txtUser.getText(),
-                txtFirstName.getText(),
-                txtLastName.getText(),
-                txtPassword.getText(),
-                txtPasswordConfirmation.getText(),
-                selectedSpec,
-                txtLicenseNumber.getText(),
-                txtAssignedOffice.getText()
+        Response response = doctorController.registerDoctor(
+                txtId.getText(), txtUser.getText(), txtFirstName.getText(), txtLastName.getText(),
+                txtPassword.getText(), txtPasswordConfirmation.getText(), selectedSpec,
+                txtLicenseNumber.getText(), txtAssignedOffice.getText()
         );
+
         if (response.isSuccess()) {
             JOptionPane.showMessageDialog(this, response.getMessage(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            loadComboBoxes();
             txtId.setText("");
             txtFirstName.setText("");
             txtLastName.setText("");
@@ -446,31 +462,56 @@ public class AdminView extends javax.swing.JFrame implements Observer {
     }
 
     private void btnDoctorViewActionPerformed(java.awt.event.ActionEvent evt) {
-        String selectedDoctor = (String) cmbDoctor.getSelectedItem();
+        if (cmbDoctor.getSelectedIndex() <= 0) {
+            return;
+        }
         
-        long doctorId = Long.parseLong(selectedDoctor.split(" - ")[0]);
-        packagee.model.Doctor doc = StorageHospital.getInstance().getDoctor(doctorId);
-       
-        HashMap<String, Object> docData = doc.serialize();
-        docData.put("role", "DOCTOR");
-        new DoctorView(docData, true).setVisible(true);
-        this.dispose();
+        String selectedDoctor = (String) cmbDoctor.getSelectedItem();
+        long docId = Long.parseLong(selectedDoctor.split(" - ")[0]);
+
+        // 1. Buscamos al doctor en la base de datos central (storage)
+        packagee.model.storage.StorageHospital storage = packagee.model.storage.StorageHospital.getInstance();
+        packagee.model.Doctor doctor = storage.getDoctor(docId);
+
+        if (doctor != null) {
+            // 2. Convertimos el doctor a HashMap (userData)
+            java.util.HashMap<String, Object> userData = doctor.serialize();
+
+            // 3. ¡Llamamos a DoctorView pasándole los 7 parámetros exactos!
+            new DoctorView(
+                userData,                 // 1. Los datos del doctor
+                docId,                    // 2. El ID del doctor
+                doctorController,         // 3. Controlador
+                appointmentController,    // 4. Controlador
+                hospitalizationController,// 5. Controlador
+                dataController,           // 6. Controlador
+                true                      // 7. true porque lo estás abriendo desde el AdminView
+            ).setVisible(true);
+        }
     }
 
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {
-        StorageHospital.getInstance().removeObserver(this);
-        new LoginView().setVisible(true);
-        this.dispose();
+        // Código para el botón de Logout
+        packagee.model.storage.StorageHospital storage = packagee.model.storage.StorageHospital.getInstance();
+        this.setVisible(false); // O this.dispose();
+        new LoginView(
+                new LoginController(storage),
+                new PatientController(storage),
+                new DoctorController(storage),
+                new AppointmentController(storage),
+                new HospitalizationController(storage),
+                new DataController(storage)
+        ).setVisible(true);
     }
 
     private void btnPatientViewActionPerformed(java.awt.event.ActionEvent evt) {
+        if (cmbPatient.getSelectedIndex() <= 0) {
+            return;
+        }
         String selectedPatient = (String) cmbPatient.getSelectedItem();
-       
-        long patientId = Long.parseLong(selectedPatient.split(" - ")[0]);
-        packagee.model.Patient pat = StorageHospital.getInstance().getPatient(patientId);
-       
-        new PatientView(pat, true).setVisible(true);
-        this.dispose();
+        long patId = Long.parseLong(selectedPatient.split(" - ")[0]);
+
+        new PatientView(patId, patientController, appointmentController, hospitalizationController, dataController, true).setVisible(true);
     }
 
     private void cmbSpecialtyActionPerformed(java.awt.event.ActionEvent evt) {
