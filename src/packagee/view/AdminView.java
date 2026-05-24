@@ -465,11 +465,11 @@ public class AdminView extends javax.swing.JFrame implements Observer {
 
     private void btnPatientViewActionPerformed(java.awt.event.ActionEvent evt) {
         String selectedPatient = (String) cmbPatient.getSelectedItem();
-       
         long patientId = Long.parseLong(selectedPatient.split(" - ")[0]);
         packagee.model.Patient pat = StorageHospital.getInstance().getPatient(patientId);
-       
-        new PatientView(pat, true).setVisible(true);
+        HashMap<String, Object> patData = pat.serialize();
+        patData.put("role", "PATIENT");
+        new PatientView(patData, true).setVisible(true);
         this.dispose();
     }
 

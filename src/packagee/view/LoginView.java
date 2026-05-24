@@ -402,9 +402,7 @@ public class LoginView extends javax.swing.JFrame {
             String role = (String) data.get("role");
 
             if (role.equals("ADMIN")) {
-                HashMap<String, Object> adminData = new HashMap<>();
-                adminData.put("role", "ADMIN");
-                new AdminView(adminData).setVisible(true);
+                new AdminView(data).setVisible(true);
             } else if (role.equals("DOCTOR")) {
                 new DoctorView(data).setVisible(true);
             } else if (role.equals("PATIENT")) {

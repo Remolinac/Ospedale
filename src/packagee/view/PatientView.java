@@ -40,7 +40,7 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         cargarTablaAppointments();
         cargarComboAppointmentsCancel();
     }
-
+       //observer
     @Override
     public void update(String event) {
         switch (event) {
@@ -539,6 +539,7 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         this.setLocation(this.getLocation().x + evt.getX() - x, this.getLocation().y + evt.getY() - y);
     }
 
+    //Handlers
     private void btnSaveActionPerformed() {
         String genderStr = cmbGender.getSelectedIndex() == 2 ? "M" : "F";
         Response r = patientController.updatePatient(
@@ -591,6 +592,7 @@ public class PatientView extends javax.swing.JFrame implements Observer {
             txtAppointmentTime.setText("");
             txtareaAppointment.setText("");
             cmbSelectDoctor.setSelectedIndex(0);
+            // Observer recargará la tabla automáticamente
         } else {
             lblAppointmentError.setForeground(Color.RED);
             lblAppointmentError.setText(r.getMessage());
@@ -630,12 +632,13 @@ public class PatientView extends javax.swing.JFrame implements Observer {
             lblCancelError.setForeground(new Color(0, 180, 0));
             lblCancelError.setText(r.getMessage());
             txtareaObservations1.setText("");
+            // Observer recargará automáticamente
         } else {
             lblCancelError.setForeground(Color.RED);
             lblCancelError.setText(r.getMessage());
         }
     }
-
+    // Variables declaration
     private javax.swing.JButton btnBack, btnCancel, btnCreate, btnCreateHospi,
             btnLogout, btnRefresh, btnSave, btnX;
     private javax.swing.JComboBox<String> cmbAppointmentCancel, cmbAppointmentType,
