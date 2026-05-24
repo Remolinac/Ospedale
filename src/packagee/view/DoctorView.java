@@ -27,6 +27,7 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
     private boolean isAdmin;
     private final DataController dataController = new DataController();
     private final DoctorController doctorController = new DoctorController();
+     AppointmentController ac = new AppointmentController();
     
     public DoctorView(HashMap<String, Object> userData) {
         initComponents();
@@ -94,7 +95,7 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
 
     private void loadComboBoxes() {
         String doctorId = String.valueOf(userData.get("id"));
-        AppointmentController ac = new AppointmentController();
+       
 
         // Citas del doctor para aceptar (REQUESTED), reagendar y completar
         Response resp = ac.getDoctorAppointments(doctorId, false);
@@ -171,8 +172,6 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
     
 
     private void loadAppointmentsTable(boolean pendingOnly) {
-        AppointmentController ac = new AppointmentController();
-        DataController dc = new DataController();
         
         String doctorId = String.valueOf(userData.get("id"));
         Response resp = ac.getDoctorAppointments(doctorId, pendingOnly);
@@ -181,7 +180,7 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
         model.setRowCount(0);
         
         if (resp.isSuccess()) {
-            Response respPacientes = dc.getAllPatients();
+            Response respPacientes = dataController.getAllPatients();
             ArrayList<HashMap<String, Object>> patientsList = new ArrayList<>();
             
             if (respPacientes.isSuccess()) {
@@ -886,7 +885,6 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
         if (jRadioButton6.isSelected()) {
             String selectedPatient = (String) cmbPatientId.getSelectedItem();
             // Buscar una cita PENDING del paciente para hospitalizar desde ella
-            AppointmentController ac = new AppointmentController();
             Response aptsResp = ac.getPatientAppointments(selectedPatient);
             String appointmentId = null;
             if (aptsResp.isSuccess()) {
@@ -942,16 +940,15 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
             }
         
         String patientId = selectedPatient.split(" - ")[0];
-        AppointmentController controller = new AppointmentController();
-        DataController dc = new DataController();
         
-        Response response = controller.getPatientAppointments(patientId);
+        
+        Response response = ac.getPatientAppointments(patientId);
         DefaultTableModel model = (DefaultTableModel) jTable3.getModel();
         model.setRowCount(0);
         
         if (response.isSuccess()) {
         // 2. Traemos a todos los doctores en formato DTO (HashMap)
-        Response respDoctors = dc.getAllDoctors();
+        Response respDoctors = dataController.getAllDoctors();
         ArrayList<HashMap<String, Object>> allDoctors= new ArrayList<>();
         
         if (respDoctors.isSuccess()) {

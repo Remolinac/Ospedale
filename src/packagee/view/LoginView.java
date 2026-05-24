@@ -4,18 +4,11 @@
  */
 package packagee.view;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.JOptionPane;
 
 import packagee.controller.LoginController;
 import packagee.controller.PatientController;
-
-import packagee.model.Appointment;
-
-import packagee.model.Hospitalization;
-
-import packagee.model.User;
 
 import packagee.util.Response;
 
@@ -27,9 +20,7 @@ import packagee.util.Response;
 public class LoginView extends javax.swing.JFrame {
 
     private int x, y;
-    private ArrayList<User> users;
-    private ArrayList<Hospitalization> hospitalizations;
-    private ArrayList<Appointment> appointments;
+    
 
     public LoginView() {
         initComponents();
