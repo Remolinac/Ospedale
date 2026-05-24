@@ -5,13 +5,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.table.DefaultTableModel;
 import packagee.controller.AppointmentController;
+import packagee.controller.DataController;
 import packagee.controller.HospitalizationController;
 import packagee.controller.PatientController;
-import packagee.model.Doctor;
-import packagee.model.Patient;
-import packagee.model.RoomType;
-import packagee.model.Specialty;
 import packagee.model.storage.StorageHospital;
+
 import packagee.util.Observer;
 import packagee.util.Response;
 
@@ -23,9 +21,12 @@ public class PatientView extends javax.swing.JFrame implements Observer {
     private final PatientController patientController = new PatientController();
     private final AppointmentController appointmentController = new AppointmentController();
     private final HospitalizationController hospitalizationController = new HospitalizationController();
+    private final HashMap<String, Object> userData;
 
+    
     public PatientView(HashMap<String, Object> patientData, boolean isAdmin) {
         initComponents();
+        this.userData = patientData;
         this.patientData = patientData;
         this.isAdmin = isAdmin;
         btnBack.setVisible(isAdmin);
@@ -66,32 +67,45 @@ public class PatientView extends javax.swing.JFrame implements Observer {
     }
 
     private void cargarComboDoctores() {
+        DataController dc = new DataController();
+        Response respDoctors = dc.getAllDoctors();
+
         cmbSelectDoctor.removeAllItems();
         cmbSelectDoctor.addItem("Select one");
-        for (Doctor d : StorageHospital.getInstance().getAllDoctors().values()) {
-            cmbSelectDoctor.addItem(d.getId() + " - " + d.getFirstname() + " " + d.getLastname()
-                    + " (" + d.getSpecialty().name() + ")");
-        }
         cmbAttendingDoctor.removeAllItems();
         cmbAttendingDoctor.addItem("Select one");
-        for (Doctor d : StorageHospital.getInstance().getAllDoctors().values()) {
-            cmbAttendingDoctor.addItem(d.getId() + " - " + d.getFirstname() + " " + d.getLastname());
+
+        if (respDoctors.isSuccess()) {
+            ArrayList<HashMap<String, Object>> doctors
+                    = (ArrayList<HashMap<String, Object>>) respDoctors.getData();
+            for (HashMap<String, Object> d : doctors) {
+                cmbSelectDoctor.addItem(d.get("id") + " - " + d.get("firstname")
+                        + " " + d.get("lastname") + " (" + d.get("specialty") + ")");
+                cmbAttendingDoctor.addItem(d.get("id") + " - " + d.get("firstname")
+                        + " " + d.get("lastname"));
+            }
         }
     }
 
     private void cargarComboEspecialidades() {
         cmbSelectDoctor.removeAllItems();
-        cmbSelectDoctor.addItem("Select one");
-        for (Specialty s : Specialty.values()) {
-            cmbSelectDoctor.addItem(s.name());
-        }
+    cmbSelectDoctor.addItem("Select one");
+    String[] especialidades = {
+        "GENERAL_MEDICINE", "CARDIOLOGY", "PEDIATRICS", "NEUROLOGY",
+        "TRAUMATOLOGY_ORTHOPEDICS", "GYNECOLOGY_OBSTETRICS", "DERMATOLOGY",
+        "PSYCHIATRY", "ONCOLOGY", "OPHTHALMOLOGY", "INTERNAL_MEDICINE"
+    };
+    for (String s : especialidades) {
+        cmbSelectDoctor.addItem(s);
+    }
     }
 
     private void cargarComboRoomTypes() {
         cmbRoomType.removeAllItems();
         cmbRoomType.addItem("Select one");
-        for (RoomType rt : RoomType.values()) {
-            cmbRoomType.addItem(rt.name());
+        String[] roomTypes = {"STANDARD", "ICU", "NICU", "IMC", "ISOLATION"};
+        for (String rt : roomTypes) {
+            cmbRoomType.addItem(rt);
         }
     }
 
@@ -228,7 +242,7 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         btnBack.addActionListener(e -> {
             StorageHospital.getInstance().removeObserver(this);
             this.setVisible(false);
-            new AdminView(StorageHospital.getInstance().getAdmin().serialize()).setVisible(true);
+            new AdminView(userData).setVisible(true);
         });
 
         javax.swing.GroupLayout p2 = new javax.swing.GroupLayout(panelRound2);

@@ -4,11 +4,11 @@
  */
 package packagee.view;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.JOptionPane;
 import packagee.controller.DataController;
 import packagee.controller.DoctorController;
-import packagee.model.Specialty;
 import packagee.model.storage.StorageHospital;
 import packagee.util.Observer;
 import packagee.util.Response;
@@ -21,6 +21,8 @@ public class AdminView extends javax.swing.JFrame implements Observer {
 
     private int x, y;
     private HashMap<String, Object> userData;
+    private final DataController dataController = new DataController();
+    private final DoctorController doctorController = new DoctorController();
 
     public AdminView(HashMap<String, Object> userData) {
         initComponents();
@@ -32,18 +34,25 @@ public class AdminView extends javax.swing.JFrame implements Observer {
     }
 
     private void loadComboBoxes() {
-        StorageHospital storage = StorageHospital.getInstance();
-
         cmbDoctor.removeAllItems();
         cmbDoctor.addItem("Select one");
-        for (packagee.model.Doctor doc : storage.getAllDoctors().values()) {
-            cmbDoctor.addItem(doc.getId() + " - " + doc.getFirstname() + " " + doc.getLastname());
+       
+        Response respDoctors = dataController.getAllDoctors();
+        if (respDoctors.isSuccess()) {
+            ArrayList<HashMap<String, Object>> doctors = (ArrayList<HashMap<String, Object>>) respDoctors.getData();
+            for (HashMap<String, Object> doc : doctors) {
+                cmbDoctor.addItem(doc.get("id") + " - " + doc.get("firstname") + " " + doc.get("lastname"));
+            }
         }
 
         cmbPatient.removeAllItems();
         cmbPatient.addItem("Select one");
-        for (packagee.model.Patient p : storage.getAllPatients().values()) {
-            cmbPatient.addItem(p.getId() + " - " + p.getFirstname() + " " + p.getLastname());
+        Response respPatients = dataController.getAllPatients();
+        if (respPatients.isSuccess()) {
+            ArrayList<HashMap<String, Object>> patients = (ArrayList<HashMap<String, Object>>) respPatients.getData();
+            for (HashMap<String, Object> p : patients) {
+                cmbPatient.addItem(p.get("id") + " - " + p.get("firstname") + " " + p.get("lastname"));
+            }
         }
     }
 
@@ -416,9 +425,9 @@ public class AdminView extends javax.swing.JFrame implements Observer {
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {
         // Registrar doctor
-        DoctorController controller = new DoctorController();
+       
         String selectedSpec = (String) cmbSpecialty.getSelectedItem();
-        Response response = controller.registerDoctor(
+        Response response = doctorController.registerDoctor(
                 txtId.getText(),
                 txtUser.getText(),
                 txtFirstName.getText(),
@@ -447,14 +456,22 @@ public class AdminView extends javax.swing.JFrame implements Observer {
 
     private void btnDoctorViewActionPerformed(java.awt.event.ActionEvent evt) {
         String selectedDoctor = (String) cmbDoctor.getSelectedItem();
-        
-        long doctorId = Long.parseLong(selectedDoctor.split(" - ")[0]);
-        packagee.model.Doctor doc = StorageHospital.getInstance().getDoctor(doctorId);
-       
-        HashMap<String, Object> docData = doc.serialize();
-        docData.put("role", "DOCTOR");
-        new DoctorView(docData, true).setVisible(true);
-        this.dispose();
+        if (selectedDoctor == null || selectedDoctor.equals("Select one")) {
+            return;
+        }
+        String doctorId = selectedDoctor.split(" - ")[0];
+        Response resp = dataController.getAllDoctors();
+        if (resp.isSuccess()) {
+            ArrayList<HashMap<String, Object>> doctors = (ArrayList<HashMap<String, Object>>) resp.getData();
+            for (HashMap<String, Object> doc : doctors) {
+                if (String.valueOf(doc.get("id")).equals(doctorId)) {
+                    doc.put("role", "DOCTOR");
+                    new DoctorView(doc, true).setVisible(true);
+                    this.dispose();
+                    return;
+                }
+            }
+        }
     }
 
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {
@@ -465,12 +482,22 @@ public class AdminView extends javax.swing.JFrame implements Observer {
 
     private void btnPatientViewActionPerformed(java.awt.event.ActionEvent evt) {
         String selectedPatient = (String) cmbPatient.getSelectedItem();
-        long patientId = Long.parseLong(selectedPatient.split(" - ")[0]);
-        packagee.model.Patient pat = StorageHospital.getInstance().getPatient(patientId);
-        HashMap<String, Object> patData = pat.serialize();
-        patData.put("role", "PATIENT");
-        new PatientView(patData, true).setVisible(true);
-        this.dispose();
+        if (selectedPatient == null || selectedPatient.equals("Select one")) {
+            return;
+        }
+        String patientId = selectedPatient.split(" - ")[0];
+        Response resp = dataController.getAllPatients();
+        if (resp.isSuccess()) {
+            ArrayList<HashMap<String, Object>> patients = (ArrayList<HashMap<String, Object>>) resp.getData();
+            for (HashMap<String, Object> pat : patients) {
+                if (String.valueOf(pat.get("id")).equals(patientId)) {
+                    pat.put("role", "PATIENT");
+                    new PatientView(pat, true).setVisible(true);
+                    this.dispose();
+                    return;
+                }
+            }
+        }
     }
 
     private void cmbSpecialtyActionPerformed(java.awt.event.ActionEvent evt) {
