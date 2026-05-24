@@ -11,7 +11,8 @@ import javax.swing.table.DefaultTableModel;
 import packagee.controller.AppointmentController;
 import packagee.controller.DoctorController;
 import packagee.controller.HospitalizationController;
-import packagee.model.storage.StorageHospital;
+//Error import packagee.model.storage.StorageHospital;
+import packagee.controller.DataController;
 import packagee.util.Observer;
 import packagee.util.Response;
 
@@ -24,7 +25,9 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
     private int x, y;
     private HashMap<String, Object> userData;
     private boolean isAdmin;
-
+    private final DataController dataController = new DataController();
+    private final DoctorController doctorController = new DoctorController();
+    
     public DoctorView(HashMap<String, Object> userData) {
         initComponents();
         this.userData = userData;
@@ -34,7 +37,9 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
         loadAppointmentsTable(false);
         btnBack.setVisible(false);
         this.setLocationRelativeTo(null);
-        StorageHospital.getInstance().addObserver(this);
+        
+        doctorController.registerObserver(this);
+        
     }
 
     public DoctorView(HashMap<String, Object> userData, boolean isAdmin) {
@@ -46,6 +51,8 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
         loadAppointmentsTable(false);
         btnBack.setVisible(isAdmin);
         this.setLocationRelativeTo(null);
+        
+        doctorController.registerObserver(this);
     }
 
 
@@ -128,46 +135,87 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
   
         cmbSelectPatient.removeAllItems();
         cmbSelectPatient.addItem("Select one");
-        for (packagee.model.Patient p : StorageHospital.getInstance().getAllPatients().values()) {
-            cmbSelectPatient.addItem(p.getId() + " - " + p.getFirstname() + " " + p.getLastname());
+        //Cambio 
+        Response response = dataController.getAllPatients();
+        
+        if(response.isSuccess()){
+            ArrayList<HashMap<String, Object>> patientsList = (ArrayList<HashMap<String, Object>>) response.getData();
+            for (HashMap<String, Object> patientData : patientsList) {
+                String Id = (String) patientData.get("id");
+                String firstName = (String) patientData.get("firstName");
+                String lastName = (String) patientData.get("lastName");
+                
+                cmbSelectPatient.addItem(Id+ " - " + firstName + " " + lastName);
         }
+        } 
 
        
         cmbPatientId.removeAllItems();
         cmbPatientId.addItem("Select one");
-        for (packagee.model.Patient p : StorageHospital.getInstance().getAllPatients().values()) {
-            cmbPatientId.addItem(String.valueOf(p.getId()));
+        
+        if(response.isSuccess()){
+            ArrayList<HashMap<String, Object>> patients = (ArrayList<HashMap<String, Object>>) response.getData();
+            
+            for(HashMap<String, Object> patient : patients){
+                String Id = (String) patient.get("id");
+                cmbPatientId.addItem(Id);
+            }
+        
         }
+        
+        
+    
+    
     }
+    
+    
 
     private void loadAppointmentsTable(boolean pendingOnly) {
         AppointmentController ac = new AppointmentController();
+        DataController dc = new DataController();
+        
         String doctorId = String.valueOf(userData.get("id"));
         Response resp = ac.getDoctorAppointments(doctorId, pendingOnly);
+        
         DefaultTableModel model = (DefaultTableModel) tblDoctorView.getModel();
         model.setRowCount(0);
+        
         if (resp.isSuccess()) {
-            StorageHospital storage = StorageHospital.getInstance();
-            ArrayList<HashMap<String, Object>> apts
-                    = (ArrayList<HashMap<String, Object>>) resp.getData();
-            for (HashMap<String, Object> ap : apts) {
-                Object patIdObj = ap.get("patientId");
-                String patientName = "";
-                if (patIdObj != null) {
-                    packagee.model.Patient pat = storage.getPatient(((Number) patIdObj).longValue());
-                    if (pat != null) {
-                        patientName = pat.getFirstname() + " " + pat.getLastname();
+            Response respPacientes = dc.getAllPatients();
+            ArrayList<HashMap<String, Object>> patientsList = new ArrayList<>();
+            
+            if (respPacientes.isSuccess()) {
+            patientsList = (ArrayList<HashMap<String, Object>>) respPacientes.getData();
+        }
+        
+            ArrayList<HashMap<String, Object>> apts = (ArrayList<HashMap<String, Object>>) resp.getData();
+        
+        for (HashMap<String, Object> ap : apts) {
+            Object patIdObj = ap.get("patientId");
+            String patientName = "Unknown Patient"; 
+            
+            if (patIdObj != null) {
+                String targetPatientId = String.valueOf(patIdObj);
+                
+                
+                for (HashMap<String, Object> p : patientsList) {
+                    if (targetPatientId.equals(String.valueOf(p.get("id")))) {
+                        patientName = p.get("firstName") + " " + p.get("lastName");
+                        break;
                     }
                 }
-                model.addRow(new Object[]{
-                    ap.get("id"),
-                    ap.get("datetime"),
-                    patientName,
-                    ap.get("specialty"),
-                    Boolean.TRUE.equals(ap.get("type")) ? "In-person" : "Remote",
-                    ap.get("status")
-                });
             }
+            
+            model.addRow(new Object[]{
+                ap.get("id"),
+                ap.get("datetime"),
+                patientName,
+                ap.get("specialty"),
+                Boolean.TRUE.equals(ap.get("type")) ? "In-person" : "Remote",
+                ap.get("status")
+            });
+        }
+            
         }
     }
 
@@ -761,7 +809,7 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {
         new AdminView(userData).setVisible(true);
-        StorageHospital.getInstance().removeObserver(this);
+        doctorController.unregisterObserver(this);
         this.dispose();
     }
 
@@ -889,32 +937,56 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
 
     private void btnSearchPatientActionPerformed(java.awt.event.ActionEvent evt) {
         String selectedPatient = (String) cmbSelectPatient.getSelectedItem();
+        if (selectedPatient == null || selectedPatient.isEmpty()) {
+        return; 
+            }
+        
         String patientId = selectedPatient.split(" - ")[0];
         AppointmentController controller = new AppointmentController();
+        DataController dc = new DataController();
+        
         Response response = controller.getPatientAppointments(patientId);
         DefaultTableModel model = (DefaultTableModel) jTable3.getModel();
         model.setRowCount(0);
+        
         if (response.isSuccess()) {
-            StorageHospital storage = StorageHospital.getInstance();
-            ArrayList<HashMap<String, Object>> apts
-                    = (ArrayList<HashMap<String, Object>>) response.getData();
-            for (HashMap<String, Object> ap : apts) {
-                Object docIdObj = ap.get("doctorId");
-                String doctorName = "";
-                if (docIdObj != null) {
-                    packagee.model.Doctor doc = storage.getDoctor(((Number) docIdObj).longValue());
-                    if (doc != null) {
-                        doctorName = doc.getFirstname() + " " + doc.getLastname();
+        // 2. Traemos a todos los doctores en formato DTO (HashMap)
+        Response respDoctors = dc.getAllDoctors();
+        ArrayList<HashMap<String, Object>> allDoctors= new ArrayList<>();
+        
+        if (respDoctors.isSuccess()) {
+            allDoctors = (ArrayList<HashMap<String, Object>>) respDoctors.getData();
+        }
+
+        ArrayList<HashMap<String, Object>> apts = (ArrayList<HashMap<String, Object>>) response.getData();
+        
+        for (HashMap<String, Object> ap : apts) {
+            Object docIdObj = ap.get("doctorId");
+            String doctorName = "Unknown Doctor";
+            
+            if (docIdObj != null) {
+                String targetDoctorId = String.valueOf(docIdObj);
+                
+                // 3. Buscamos el nombre del doctor iterando sobre los datos serializados
+                for (HashMap<String, Object> d : allDoctors) {
+                    if (targetDoctorId.equals(String.valueOf(d.get("id")))) {
+                        doctorName = d.get("firstName") + " " + d.get("lastName");
+                        break;
                     }
                 }
-                model.addRow(new Object[]{
-                    ap.get("id"), ap.get("datetime"), doctorName,
-                    ap.get("specialty"),
-                    Boolean.TRUE.equals(ap.get("type")) ? "In-person" : "Remote",
-                    ap.get("status")
-                });
             }
-        } else {
+            
+            
+            model.addRow(new Object[]{
+                ap.get("id"), 
+                ap.get("datetime"), 
+                doctorName,
+                ap.get("specialty"),
+                Boolean.TRUE.equals(ap.get("type")) ? "In-person" : "Remote",
+                ap.get("status")
+            });
+        }
+    }else {
             JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }

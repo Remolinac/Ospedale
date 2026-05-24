@@ -115,4 +115,11 @@ public class DoctorController {
 
         return new Response(true, "Doctor actualizado correctamente", doctor.serialize());
     }
+    public void registerObserver(packagee.util.Observer observer) {
+    StorageHospital.getInstance().addObserver(observer);
+}
+
+    public void unregisterObserver(packagee.util.Observer observer) {
+    StorageHospital.getInstance().removeObserver(observer);
+}
 }
