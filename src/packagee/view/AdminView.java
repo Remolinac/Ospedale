@@ -13,7 +13,6 @@ import packagee.controller.DoctorController;
 import packagee.controller.HospitalizationController;
 import packagee.controller.LoginController;
 import packagee.controller.PatientController;
-import packagee.model.Specialty;
 import packagee.model.storage.StorageHospital;
 import packagee.util.Observer;
 import packagee.util.Response;
@@ -465,34 +464,34 @@ public class AdminView extends javax.swing.JFrame implements Observer {
         if (cmbDoctor.getSelectedIndex() <= 0) {
             return;
         }
-        
-        String selectedDoctor = (String) cmbDoctor.getSelectedItem();
-        long docId = Long.parseLong(selectedDoctor.split(" - ")[0]);
 
-        // 1. Buscamos al doctor en la base de datos central (storage)
-        packagee.model.storage.StorageHospital storage = packagee.model.storage.StorageHospital.getInstance();
-        packagee.model.Doctor doctor = storage.getDoctor(docId);
+        long docId = Long.parseLong(((String) cmbDoctor.getSelectedItem()).split(" - ")[0]);
+        Response res = dataController.getAllDoctors();
 
-        if (doctor != null) {
-            // 2. Convertimos el doctor a HashMap (userData)
-            java.util.HashMap<String, Object> userData = doctor.serialize();
+        if (res.isSuccess()) {
+            // 1. Obtener la lista correcta
+            java.util.List<java.util.HashMap<String, Object>> doctores = (java.util.List<java.util.HashMap<String, Object>>) res.getData();
 
-            // 3. ¡Llamamos a DoctorView pasándole los 7 parámetros exactos!
-            new DoctorView(
-                userData,                 // 1. Los datos del doctor
-                docId,                    // 2. El ID del doctor
-                doctorController,         // 3. Controlador
-                appointmentController,    // 4. Controlador
-                hospitalizationController,// 5. Controlador
-                dataController,           // 6. Controlador
-                true                      // 7. true porque lo estás abriendo desde el AdminView
-            ).setVisible(true);
+            // 2. Buscar el mapa del doctor seleccionado
+            java.util.HashMap<String, Object> userData = null;
+            for (java.util.HashMap<String, Object> d : doctores) {
+                if (Long.parseLong(String.valueOf(d.get("id"))) == docId) {
+                    userData = d;
+                    break;
+                }
+            }
+
+            if (userData != null) {
+                new DoctorView(userData, docId, doctorController, appointmentController,
+                        hospitalizationController, dataController, true).setVisible(true);
+            }
         }
     }
 
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {
         // Código para el botón de Logout
         packagee.model.storage.StorageHospital storage = packagee.model.storage.StorageHospital.getInstance();
+        StorageHospital.getInstance().removeObserver(this);
         this.setVisible(false); // O this.dispose();
         new LoginView(
                 new LoginController(storage),
@@ -502,6 +501,7 @@ public class AdminView extends javax.swing.JFrame implements Observer {
                 new HospitalizationController(storage),
                 new DataController(storage)
         ).setVisible(true);
+
     }
 
     private void btnPatientViewActionPerformed(java.awt.event.ActionEvent evt) {

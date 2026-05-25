@@ -10,14 +10,11 @@ import packagee.controller.DataController;
 import packagee.controller.HospitalizationController;
 import packagee.controller.LoginController;
 import packagee.controller.PatientController;
-import packagee.model.Doctor;
-import packagee.model.Patient;
-import packagee.model.RoomType;
-import packagee.model.Specialty;
 import packagee.model.storage.StorageHospital;
 import packagee.util.Observer;
 import packagee.util.Response;
 import packagee.controller.*;
+import packagee.model.User;
 
 public class PatientView extends javax.swing.JFrame implements Observer {
 
@@ -48,29 +45,38 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         for (java.awt.event.ActionListener al : btnBack.getActionListeners()) {
             btnBack.removeActionListener(al);
         }
-            
+
         // Le damos la acción correcta para volver al AdminView
         btnBack.addActionListener(e -> {
             this.dispose(); // Cierra el PatientView
-            
+
             // 1. Obtenemos el ID del administrador desde el storage
             packagee.model.storage.StorageHospital storage = packagee.model.storage.StorageHospital.getInstance();
-            long currentAdminId = storage.getAdmin().getId(); 
-            
+            long currentAdminId = storage.getAdmin().getId();
+
             // 2. Abrimos el AdminView respetando su constructor al pie de la letra
             new packagee.view.AdminView(
-                currentAdminId,             // 1. long adminId
-                doctorController,           // 2. DoctorController dc
-                patientController,          // 3. PatientController pc
-                appointmentController,      // 4. AppointmentController ac
-                hospitalizationController,  // 5. HospitalizationController hc
-                dataController              // 6. DataController datac
+                    currentAdminId, // 1. long adminId
+                    doctorController, // 2. DoctorController dc
+                    patientController, // 3. PatientController pc
+                    appointmentController, // 4. AppointmentController ac
+                    hospitalizationController, // 5. HospitalizationController hc
+                    dataController // 6. DataController datac
             ).setVisible(true);
         });
         this.setBackground(new Color(0, 0, 0, 0));
         this.setSize(1400, 750);
         this.setLocationRelativeTo(null);
         StorageHospital.getInstance().addObserver(this);
+        tabbedpanePatientView.addChangeListener(e -> {
+        if (tabbedpanePatientView.getSelectedIndex() == 1) { 
+        // 1. Recibimos directamente el HashMap (ya no usamos Response)
+        java.util.HashMap<String, Object> data = patientController.getPacienteData(String.valueOf(patientId));
+        
+        // 2. Se lo pasamos a tu método para que pinte los datos
+        cargarDatosPaciente(data);
+    }
+        });
 
         cargarComboDoctores();
         cargarComboEspecialidades();
@@ -79,9 +85,8 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         cargarComboAppointmentsCancel();
     }
 
-    // ── Observer ──
-    @Override
 
+    @Override
     public void update(String event) {
         switch (event) {
             case "APPOINTMENT_ADDED":
@@ -113,39 +118,60 @@ public class PatientView extends javax.swing.JFrame implements Observer {
     }
 
     private void cargarComboEspecialidades() {
-        // En un mundo MVC estricto, esto también debería venir del DataController si son dinámicas.
         cmbSelectDoctor.removeAllItems();
-        cmbSelectDoctor.addItem("Select one");
-        // Omitido para enfocarnos en los datos que vienen del backend por DataController
+        cmbSelectDoctor.addItem("Select one"); // O "Select a specialty"
+
+        // Llamamos al controlador, manteniendo el MVC
+        Response res = dataController.getSpecialties();
+
+        if (res.isSuccess()) {
+            List<String> specialties = (List<String>) res.getData();
+            for (String spec : specialties) {
+                cmbSelectDoctor.addItem(spec);
+            }
+        }
+    }
+
+    public void cargarDatosPaciente(java.util.HashMap<String, Object> pacienteData) {
+        if (pacienteData != null) {
+            txtFirstName.setText(String.valueOf(pacienteData.getOrDefault("firstname", "")));
+            txtLastname.setText(String.valueOf(pacienteData.getOrDefault("lastname", "")));
+            txtBirthdate.setText(String.valueOf(pacienteData.getOrDefault("birthdate", "")));
+            txtPhone.setText(String.valueOf(pacienteData.getOrDefault("phone", "")));
+            txtAdress.setText(String.valueOf(pacienteData.getOrDefault("address", "")));
+            txtEmail.setText(String.valueOf(pacienteData.getOrDefault("email", "")));
+            txtUser.setText(String.valueOf(pacienteData.getOrDefault("username", "")));
+        }
     }
 
     private void cargarComboRoomTypes() {
-        cmbRoomType.removeAllItems();
-        cmbRoomType.addItem("Select one");
-        cmbRoomType.addItem("STANDARD");
-        cmbRoomType.addItem("ICU"); // Ejemplo
+        cmbRoomType.setModel(new javax.swing.DefaultComboBoxModel<>(
+                new String[]{"Select one", "STANDARD", "ICU", "NICU", "IMC", "ISOLATION"}
+        ));
     }
 
     @SuppressWarnings("unchecked")
     private void cargarTablaAppointments() {
-        Response r = appointmentController.getPatientAppointments(String.valueOf(patientId));
-        if (!r.isSuccess()) {
-            return;
-        }
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblPatientView.getModel();
+        model.setRowCount(0); // Limpiar la tabla anterior
 
-        DefaultTableModel model = (DefaultTableModel) tblPatientView.getModel();
-        model.setRowCount(0);
-        ArrayList<HashMap<String, Object>> list = (ArrayList<HashMap<String, Object>>) r.getData();
-        for (HashMap<String, Object> a : list) {
-            Object docIdObj = a.get("doctorId");
-            String doctorName = "";
-            if (docIdObj != null) {
-                packagee.model.Doctor doc = StorageHospital.getInstance().getDoctor(((Number) docIdObj).longValue());
-                if (doc != null) {
-                    doctorName = doc.getFirstname() + " " + doc.getLastname();
-                }
+        // Llamamos al controlador pasándole nuestro patientId convertido a texto
+        packagee.util.Response response = appointmentController.getPatientAppointments(String.valueOf(this.patientId));
+
+        if (response.isSuccess()) {
+            java.util.ArrayList<java.util.HashMap<String, Object>> appointments
+                    = (java.util.ArrayList<java.util.HashMap<String, Object>>) response.getData();
+
+            for (java.util.HashMap<String, Object> appt : appointments) {
+                model.addRow(new Object[]{
+                    appt.get("id"),
+                    appt.get("datetime"),
+                    appt.get("doctorId"),
+                    appt.get("specialty"),
+                    appt.get("isRequestedByDoctor") != null && (boolean) appt.get("isRequestedByDoctor") ? "Doctor" : "Specialty",
+                    appt.get("status")
+                });
             }
-            model.addRow(new Object[]{a.get("id"), a.get("datetime"), doctorName, a.get("specialty"), Boolean.TRUE.equals(a.get("type")) ? "In-person" : "Remote", a.get("status")});
         }
     }
 

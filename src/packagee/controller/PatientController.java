@@ -5,6 +5,7 @@
 package packagee.controller;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import packagee.model.Patient;
 import packagee.model.storage.StorageHospital;
 import packagee.util.Response;
@@ -87,4 +88,9 @@ public class PatientController {
 
         return new Response(true, "Paciente actualizado correctamente", patient.serialize());
     }
+    public HashMap<String, Object> getPacienteData(String patientId) {
+    // Aquí el controlador actúa como intermediario puro
+    Patient p = storage.getPatient(Long.parseLong(patientId));
+    return (p != null) ? p.serialize() : new HashMap<>();
+}
 }

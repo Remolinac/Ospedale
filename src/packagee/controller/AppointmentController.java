@@ -14,7 +14,6 @@ import packagee.model.Appointment;
 import packagee.model.AppointmentStatus;
 import packagee.model.Doctor;
 import packagee.model.Patient;
-import packagee.model.Prescription;
 import packagee.model.Specialty;
 import packagee.model.Prescription;
 import packagee.model.storage.StorageHospital;
@@ -99,25 +98,47 @@ public class AppointmentController {
     }
 
     public Response acceptAppointment(String appointmentId, String doctorId) {
-        if (appointmentId == null || appointmentId.trim().isEmpty() || appointmentId.equals("Select one")) return new Response(false, "El ID de la cita no puede estar vacío", null);
-
-        Appointment appointment = storage.getAppointment(appointmentId);
-        if (appointment == null) return new Response(false, "No existe una cita con ese ID", null);
-        if (appointment.getStatus() != AppointmentStatus.REQUESTED) return new Response(false, "La cita debe estar en estado REQUESTED para ser aceptada", null);
-
-        appointment.setStatus(AppointmentStatus.PENDING);
-        return new Response(true, "Cita aceptada correctamente", appointment.serialize());
+        String idLimpio = appointmentId.trim();
+    
+    // OBTENEMOS TODAS LAS CITAS DISPONIBLES
+    var todasLasCitas = packagee.model.storage.StorageHospital.getInstance().getAllAppointments();
+    
+    System.out.println("--- DEBUGGING ---");
+    System.out.println("Buscando ID: '" + idLimpio + "'");
+    System.out.println("IDs existentes en el Storage: " + todasLasCitas.keySet());
+    
+    // BUSQUEDA MANUAL
+    packagee.model.Appointment cita = todasLasCitas.get(idLimpio);
+    
+    if (cita == null) {
+        return new packagee.util.Response(false, "No encontrada. ID enviado: '" + idLimpio + "'", null);
+    }
+    
+    cita.setStatus(packagee.model.AppointmentStatus.PENDING);
+    packagee.model.storage.StorageHospital.getInstance().notifyObservers("APPOINTMENT_UPDATED");
+    
+    return new packagee.util.Response(true, "Éxito", null);
     }
 
     public Response completeAppointment(String appointmentId, String doctorId) {
-        if (appointmentId == null || appointmentId.trim().isEmpty() || appointmentId.equals("Select one")) return new Response(false, "El ID de la cita no puede estar vacío", null);
-
-        Appointment appointment = storage.getAppointment(appointmentId);
-        if (appointment == null) return new Response(false, "No existe una cita con ese ID", null);
-        if (appointment.getStatus() != AppointmentStatus.PENDING) return new Response(false, "La cita debe estar en estado PENDING para ser completada", null);
-
-        appointment.setStatus(AppointmentStatus.COMPLETED);
-        return new Response(true, "Cita completada correctamente", appointment.serialize());
+        try {
+        // 1. Buscamos la cita usando el String
+        packagee.model.Appointment cita = packagee.model.storage.StorageHospital.getInstance().getAppointment(appointmentId);
+        
+        if (cita != null) {
+            // 2. Cambiamos el estado a COMPLETADA
+            cita.setStatus(packagee.model.AppointmentStatus.COMPLETED); 
+            
+            // 3. ¡LA MAGIA! Esto hace que las tablas y los combos se actualicen
+            packagee.model.storage.StorageHospital.getInstance().notifyObservers("APPOINTMENT_UPDATED");
+            
+            return new packagee.util.Response(true, "Appointment completed successfully.", null);
+        } else {
+            return new packagee.util.Response(false, "Error: Appointment not found.", null);
+        }
+    } catch (Exception e) {
+        return new packagee.util.Response(false, "System error: " + e.getMessage(), null);
+    }
     }
 
     public Response cancelAppointment(String appointmentId, String patientId) {

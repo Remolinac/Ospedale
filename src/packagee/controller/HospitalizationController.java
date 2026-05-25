@@ -56,6 +56,9 @@ public class HospitalizationController {
         );
 
         storage.addHospitalization(hospitalization);
+        
+        // ¡AGREGADO! Avisamos a las vistas
+        storage.notifyObservers("HOSPITALIZATION_UPDATED");
         return new Response(true, "Hospitalización solicitada correctamente", hospitalization.serialize());
     }
 
@@ -67,6 +70,9 @@ public class HospitalizationController {
         if (hospitalization.getStatus() != HospitalizationStatus.REQUESTED) return new Response(false, "La hospitalización debe estar en estado REQUESTED para ser aprobada", null);
 
         hospitalization.setStatus(HospitalizationStatus.ONGOING);
+        
+        // ¡AGREGADO! Avisamos a las vistas
+        storage.notifyObservers("HOSPITALIZATION_UPDATED");
         return new Response(true, "Hospitalización aprobada correctamente", hospitalization.serialize());
     }
 
@@ -78,6 +84,9 @@ public class HospitalizationController {
         if (hospitalization.getStatus() != HospitalizationStatus.REQUESTED) return new Response(false, "La hospitalización debe estar en estado REQUESTED para ser denegada", null);
 
         hospitalization.setStatus(HospitalizationStatus.CANCELED);
+        
+        // ¡AGREGADO! Avisamos a las vistas
+        storage.notifyObservers("HOSPITALIZATION_UPDATED");
         return new Response(true, "Solicitud de hospitalización denegada correctamente", hospitalization.serialize());
     }
 
@@ -112,6 +121,9 @@ public class HospitalizationController {
         );
 
         storage.addHospitalization(hospitalization);
+        
+        // ¡AGREGADO! Avisamos que cambiaron citas Y hospitalizaciones
+        storage.notifyObservers("ALL_UPDATED");
         return new Response(true, "Paciente hospitalizado y cita completada correctamente", hospitalization.serialize());
     }
 
@@ -130,4 +142,19 @@ public class HospitalizationController {
 
         return new Response(true, "Hospitalizaciones obtenidas correctamente", serialized);
     }
-}
+
+    // --- ¡ESTO ES LO QUE TE FALTABA PARA LA VISTA DEL DOCTOR! ---
+    public Response getPendingHospitalizationsForDoctor(String doctorId) {
+        if (doctorId == null || doctorId.trim().isEmpty()) return new Response(false, "Error: Doctor ID missing", null);
+
+        ArrayList<HashMap<String, Object>> serialized = new ArrayList<>();
+        
+        // Buscamos todas las hospitalizaciones del doctor que estén en estado "REQUESTED"
+        for (Hospitalization h : storage.getAllHospitalizations().values()) {
+            if (String.valueOf(h.getDoctor().getId()).equals(doctorId) && h.getStatus() == HospitalizationStatus.REQUESTED) {
+                serialized.add(h.serialize());
+            }
+        }
+
+        return new Response(true, "Solicitudes pendientes", serialized);
+}}

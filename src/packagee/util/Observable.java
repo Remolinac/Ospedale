@@ -23,7 +23,7 @@ public class Observable {
         observers.remove(o);
     }
 
-    protected void notifyObservers(String event) {
+    public void notifyObservers(String event) {
         for (Observer o : observers) {
             o.update(event);
         }
