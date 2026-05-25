@@ -16,30 +16,23 @@ import packagee.util.Validator;
  */
 public class DoctorController {
 
+    private final StorageHospital storage;
+
+    // Inyección de dependencias
+    public DoctorController(StorageHospital storage) {
+        this.storage = storage;
+    }
+
     public Response registerDoctor(String id, String username, String firstname,
             String lastname, String password, String confirm,
             String specialty, String licenseNumber, String assignedOffice) {
 
-        if (!Validator.isValidId(id)) {
-            return new Response(false, "El ID debe tener exactamente 12 dígitos y ser mayor que 0", null);
-        }
-        if (username == null || username.trim().isEmpty()) {
-            return new Response(false, "El nombre de usuario no puede estar vacío", null);
-        }
-        if (!Validator.isValidPassword(password, confirm)) {
-            return new Response(false, "La contraseña no puede estar vacía o las contraseñas no coinciden", null);
-        }
-        if (specialty == null || specialty.trim().isEmpty()) {
-            return new Response(false, "La especialidad no puede estar vacía", null);
-        }
-        if (!Validator.isValidLicense(licenseNumber)) {
-            return new Response(false, "La licencia debe tener el formato L-XXXXXXXXXX MTL", null);
-        }
-        if (!Validator.isValidOffice(assignedOffice)) {
-            return new Response(false, "La oficina debe tener el formato O-XXX", null);
-        }
-
-        StorageHospital storage = StorageHospital.getInstance();
+        if (!Validator.isValidId(id)) return new Response(false, "El ID debe tener exactamente 12 dígitos y ser mayor que 0", null);
+        if (username == null || username.trim().isEmpty()) return new Response(false, "El nombre de usuario no puede estar vacío", null);
+        if (!Validator.isValidPassword(password, confirm)) return new Response(false, "La contraseña no puede estar vacía o las contraseñas no coinciden", null);
+        if (specialty == null || specialty.trim().isEmpty() || specialty.equals("Select one")) return new Response(false, "La especialidad no puede estar vacía", null);
+        if (!Validator.isValidLicense(licenseNumber)) return new Response(false, "La licencia debe tener el formato L-XXXXXXXXXX MTL", null);
+        if (!Validator.isValidOffice(assignedOffice)) return new Response(false, "La oficina debe tener el formato O-XXX", null);
 
         if (storage.getDoctor(Long.parseLong(id)) != null) {
             return new Response(false, "Ya existe un doctor con ese ID", null);
@@ -68,26 +61,12 @@ public class DoctorController {
             String lastname, String password, String confirm,
             String specialty, String licenseNumber, String assignedOffice) {
 
-        if (!Validator.isValidId(id)) {
-            return new Response(false, "El ID debe tener exactamente 12 dígitos y ser mayor que 0", null);
-        }
-        if (username == null || username.trim().isEmpty()) {
-            return new Response(false, "El nombre de usuario no puede estar vacío", null);
-        }
-        if (!Validator.isValidPassword(password, confirm)) {
-            return new Response(false, "La contraseña no puede estar vacía o las contraseñas no coinciden", null);
-        }
-        if (specialty == null || specialty.trim().isEmpty()) {
-            return new Response(false, "La especialidad no puede estar vacía", null);
-        }
-        if (!Validator.isValidLicense(licenseNumber)) {
-            return new Response(false, "La licencia debe tener el formato L-XXXXXXXXXX MTL", null);
-        }
-        if (!Validator.isValidOffice(assignedOffice)) {
-            return new Response(false, "La oficina debe tener el formato O-XXX", null);
-        }
-
-        StorageHospital storage = StorageHospital.getInstance();
+        if (!Validator.isValidId(id)) return new Response(false, "El ID debe tener exactamente 12 dígitos y ser mayor que 0", null);
+        if (username == null || username.trim().isEmpty()) return new Response(false, "El nombre de usuario no puede estar vacío", null);
+        if (!Validator.isValidPassword(password, confirm)) return new Response(false, "La contraseña no puede estar vacía o las contraseñas no coinciden", null);
+        if (specialty == null || specialty.trim().isEmpty() || specialty.equals("Select one")) return new Response(false, "La especialidad no puede estar vacía", null);
+        if (!Validator.isValidLicense(licenseNumber)) return new Response(false, "La licencia debe tener el formato L-XXXXXXXXXX MTL", null);
+        if (!Validator.isValidOffice(assignedOffice)) return new Response(false, "La oficina debe tener el formato O-XXX", null);
 
         Doctor doctor = storage.getDoctor(Long.parseLong(id));
         if (doctor == null) {

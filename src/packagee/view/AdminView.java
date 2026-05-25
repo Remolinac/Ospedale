@@ -6,9 +6,17 @@ package packagee.view;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import javax.swing.JOptionPane;
+import packagee.controller.AppointmentController;
 import packagee.controller.DataController;
 import packagee.controller.DoctorController;
+<<<<<<< HEAD
+=======
+import packagee.controller.HospitalizationController;
+import packagee.controller.LoginController;
+import packagee.controller.PatientController;
+>>>>>>> feature/view
 import packagee.model.storage.StorageHospital;
 import packagee.util.Observer;
 import packagee.util.Response;
@@ -20,13 +28,30 @@ import packagee.util.Response;
 public class AdminView extends javax.swing.JFrame implements Observer {
 
     private int x, y;
+<<<<<<< HEAD
     private HashMap<String, Object> userData;
     private final DataController dataController = new DataController();
     private final DoctorController doctorController = new DoctorController();
+=======
+    private long adminId;
 
-    public AdminView(HashMap<String, Object> userData) {
+    // Controladores inyectados
+    private DoctorController doctorController;
+    private PatientController patientController; // Añadido para poder inyectarlo en PatientView
+    private AppointmentController appointmentController;
+    private HospitalizationController hospitalizationController;
+    private DataController dataController;
+
+    public AdminView(long adminId, DoctorController dc, PatientController pc, AppointmentController ac, HospitalizationController hc, DataController datac) {
+        this.adminId = adminId;
+        this.doctorController = dc;
+        this.patientController = pc;
+        this.appointmentController = ac;
+        this.hospitalizationController = hc;
+        this.dataController = datac;
+>>>>>>> feature/view
+
         initComponents();
-        this.userData = userData;
         loadComboBoxes();
         this.setSize(1400, 717);
         this.setLocationRelativeTo(null);
@@ -36,21 +61,35 @@ public class AdminView extends javax.swing.JFrame implements Observer {
     private void loadComboBoxes() {
         cmbDoctor.removeAllItems();
         cmbDoctor.addItem("Select one");
+<<<<<<< HEAD
        
         Response respDoctors = dataController.getAllDoctors();
         if (respDoctors.isSuccess()) {
             ArrayList<HashMap<String, Object>> doctors = (ArrayList<HashMap<String, Object>>) respDoctors.getData();
             for (HashMap<String, Object> doc : doctors) {
+=======
+        Response resDocs = dataController.getAllDoctors();
+        if (resDocs.isSuccess()) {
+            List<HashMap<String, Object>> docs = (List<HashMap<String, Object>>) resDocs.getData();
+            for (HashMap<String, Object> doc : docs) {
+>>>>>>> feature/view
                 cmbDoctor.addItem(doc.get("id") + " - " + doc.get("firstname") + " " + doc.get("lastname"));
             }
         }
 
         cmbPatient.removeAllItems();
         cmbPatient.addItem("Select one");
+<<<<<<< HEAD
         Response respPatients = dataController.getAllPatients();
         if (respPatients.isSuccess()) {
             ArrayList<HashMap<String, Object>> patients = (ArrayList<HashMap<String, Object>>) respPatients.getData();
             for (HashMap<String, Object> p : patients) {
+=======
+        Response resPats = dataController.getAllPatients();
+        if (resPats.isSuccess()) {
+            List<HashMap<String, Object>> pats = (List<HashMap<String, Object>>) resPats.getData();
+            for (HashMap<String, Object> p : pats) {
+>>>>>>> feature/view
                 cmbPatient.addItem(p.get("id") + " - " + p.get("firstname") + " " + p.get("lastname"));
             }
         }
@@ -424,6 +463,7 @@ public class AdminView extends javax.swing.JFrame implements Observer {
     }
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {
+<<<<<<< HEAD
         // Registrar doctor
        
         String selectedSpec = (String) cmbSpecialty.getSelectedItem();
@@ -437,10 +477,17 @@ public class AdminView extends javax.swing.JFrame implements Observer {
                 selectedSpec,
                 txtLicenseNumber.getText(),
                 txtAssignedOffice.getText()
+=======
+        String selectedSpec = (String) cmbSpecialty.getSelectedItem();
+        Response response = doctorController.registerDoctor(
+                txtId.getText(), txtUser.getText(), txtFirstName.getText(), txtLastName.getText(),
+                txtPassword.getText(), txtPasswordConfirmation.getText(), selectedSpec,
+                txtLicenseNumber.getText(), txtAssignedOffice.getText()
+>>>>>>> feature/view
         );
+
         if (response.isSuccess()) {
             JOptionPane.showMessageDialog(this, response.getMessage(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            loadComboBoxes();
             txtId.setText("");
             txtFirstName.setText("");
             txtLastName.setText("");
@@ -455,6 +502,7 @@ public class AdminView extends javax.swing.JFrame implements Observer {
     }
 
     private void btnDoctorViewActionPerformed(java.awt.event.ActionEvent evt) {
+<<<<<<< HEAD
         String selectedDoctor = (String) cmbDoctor.getSelectedItem();
         if (selectedDoctor == null || selectedDoctor.equals("Select one")) {
             return;
@@ -471,17 +519,57 @@ public class AdminView extends javax.swing.JFrame implements Observer {
                     return;
                 }
             }
+=======
+        if (cmbDoctor.getSelectedIndex() <= 0) {
+            return;
+        }
+
+        long docId = Long.parseLong(((String) cmbDoctor.getSelectedItem()).split(" - ")[0]);
+        Response res = dataController.getAllDoctors();
+
+        if (res.isSuccess()) {
+            // 1. Obtener la lista correcta
+            java.util.List<java.util.HashMap<String, Object>> doctores = (java.util.List<java.util.HashMap<String, Object>>) res.getData();
+
+            // 2. Buscar el mapa del doctor seleccionado
+            java.util.HashMap<String, Object> userData = null;
+            for (java.util.HashMap<String, Object> d : doctores) {
+                if (Long.parseLong(String.valueOf(d.get("id"))) == docId) {
+                    userData = d;
+                    break;
+                }
+            }
+
+            if (userData != null) {
+                new DoctorView(userData, docId, doctorController, appointmentController,
+                        hospitalizationController, dataController, true).setVisible(true);
+            }
+>>>>>>> feature/view
         }
     }
 
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {
+        // Código para el botón de Logout
+        packagee.model.storage.StorageHospital storage = packagee.model.storage.StorageHospital.getInstance();
         StorageHospital.getInstance().removeObserver(this);
-        new LoginView().setVisible(true);
-        this.dispose();
+        this.setVisible(false); // O this.dispose();
+        new LoginView(
+                new LoginController(storage),
+                new PatientController(storage),
+                new DoctorController(storage),
+                new AppointmentController(storage),
+                new HospitalizationController(storage),
+                new DataController(storage)
+        ).setVisible(true);
+
     }
 
     private void btnPatientViewActionPerformed(java.awt.event.ActionEvent evt) {
+        if (cmbPatient.getSelectedIndex() <= 0) {
+            return;
+        }
         String selectedPatient = (String) cmbPatient.getSelectedItem();
+<<<<<<< HEAD
         if (selectedPatient == null || selectedPatient.equals("Select one")) {
             return;
         }
@@ -498,6 +586,11 @@ public class AdminView extends javax.swing.JFrame implements Observer {
                 }
             }
         }
+=======
+        long patId = Long.parseLong(selectedPatient.split(" - ")[0]);
+
+        new PatientView(patId, patientController, appointmentController, hospitalizationController, dataController, true).setVisible(true);
+>>>>>>> feature/view
     }
 
     private void cmbSpecialtyActionPerformed(java.awt.event.ActionEvent evt) {

@@ -1,6 +1,6 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+     * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+     * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package packagee.view;
 
@@ -9,6 +9,7 @@ import java.util.HashMap;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import packagee.controller.AppointmentController;
+import packagee.controller.DataController;
 import packagee.controller.DoctorController;
 import packagee.controller.HospitalizationController;
 //Error import packagee.model.storage.StorageHospital;
@@ -22,9 +23,12 @@ import packagee.util.Response;
  */
 public class DoctorView extends javax.swing.JFrame implements Observer {
 
+    // 1. Declarar la variable aquí arriba
+    private java.util.HashMap<String, Object> userData;
     private int x, y;
-    private HashMap<String, Object> userData;
+    private long doctorId;
     private boolean isAdmin;
+<<<<<<< HEAD
     private final DataController dataController = new DataController();
     private final DoctorController doctorController = new DoctorController();
      AppointmentController ac = new AppointmentController();
@@ -42,20 +46,40 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
         doctorController.registerObserver(this);
         
     }
+=======
 
-    public DoctorView(HashMap<String, Object> userData, boolean isAdmin) {
-        initComponents();
-        this.userData = userData;
+    private DoctorController doctorController;
+    private AppointmentController appointmentController;
+    private HospitalizationController hospitalizationController;
+    private DataController dataController;
+>>>>>>> feature/view
+
+    public DoctorView(HashMap<String, Object> data, long doctorId, DoctorController dc, AppointmentController ac,
+            HospitalizationController hc, DataController datac, boolean isAdmin) {
+        this.userData = data; // 3. Guardarla
+        this.doctorId = doctorId;
+        this.doctorController = dc;
+        this.appointmentController = ac;
+        this.hospitalizationController = hc;
+        this.dataController = datac;
         this.isAdmin = isAdmin;
-        loadUserData();
-        loadComboBoxes();
-        loadAppointmentsTable(false);
+        initComponents();
         btnBack.setVisible(isAdmin);
         this.setLocationRelativeTo(null);
+<<<<<<< HEAD
         
         doctorController.registerObserver(this);
     }
+=======
+        StorageHospital.getInstance().addObserver(this);
+        txtFirstName.setText((String) userData.get("firstname"));
+        txtLastName.setText((String) userData.get("lastname"));
+>>>>>>> feature/view
 
+        // Cargar datos
+        loadComboBoxes();
+        loadAppointmentsTable(false);
+    }
 
     private void loadUserData() {
         txtFirstName.setText((String) userData.get("firstname"));
@@ -94,11 +118,14 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
     }
 
     private void loadComboBoxes() {
+<<<<<<< HEAD
         String doctorId = String.valueOf(userData.get("id"));
        
+=======
+        String doctorId = String.valueOf(this.doctorId);
+>>>>>>> feature/view
 
-        // Citas del doctor para aceptar (REQUESTED), reagendar y completar
-        Response resp = ac.getDoctorAppointments(doctorId, false);
+        // 1. Limpieza total de los componentes
         cmbAcceptAppointment.removeAllItems();
         cmbAcceptAppointment.addItem("Select one");
         cmbRescheduleAppointment.removeAllItems();
@@ -107,32 +134,41 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
         cmbCompleteAppointment.addItem("Select one");
         cmbPrescribeAppointment.removeAllItems();
         cmbPrescribeAppointment.addItem("Select one");
-
-        if (resp.isSuccess()) {
-            ArrayList<HashMap<String, Object>> apts
-                    = (ArrayList<HashMap<String, Object>>) resp.getData();
-            for (HashMap<String, Object> ap : apts) {
-                String apId = (String) ap.get("id");
-                cmbAcceptAppointment.addItem(apId);
-                cmbRescheduleAppointment.addItem(apId);
-                cmbCompleteAppointment.addItem(apId);
-                cmbPrescribeAppointment.addItem(apId);
-            }
-        }
-
-        // Hospitalizaciones para cancelar/aprobar
-        HospitalizationController hc = new HospitalizationController();
-        Response hResp = hc.getHospitalizations(doctorId);
         cmbHospitalization.removeAllItems();
         cmbHospitalization.addItem("Select one");
-        if (hResp.isSuccess()) {
-            ArrayList<HashMap<String, Object>> hosps
-                    = (ArrayList<HashMap<String, Object>>) hResp.getData();
-            for (HashMap<String, Object> h : hosps) {
-                cmbHospitalization.addItem((String) h.get("id"));
+        cmbSelectPatient.removeAllItems();
+        cmbSelectPatient.addItem("Select one");
+        cmbPatientId.removeAllItems();
+        cmbPatientId.addItem("Select one");
+
+        // 2. Carga de Citas
+        Response resp = appointmentController.getDoctorAppointments(doctorId, false);
+        if (resp != null && resp.isSuccess() && resp.getData() != null) {
+            ArrayList<HashMap<String, Object>> apts = (ArrayList<HashMap<String, Object>>) resp.getData();
+
+            for (HashMap<String, Object> ap : apts) {
+                String apId = String.valueOf(ap.get("id"));
+                String status = String.valueOf(ap.get("status"));
+
+    
+                if ("REQUESTED".equalsIgnoreCase(status)) {
+                    cmbAcceptAppointment.addItem(apId);
+     
+                }
+
+                // Citas en ACCEPTED: Se pueden completar
+                if ("PENDING".equalsIgnoreCase(status)) {
+                    cmbCompleteAppointment.addItem(apId);
+                }
+
+                // Citas en COMPLETED: Se pueden prescribir (Aquí es donde debes asegurarte que el backend acepte este estado)
+                if ("COMPLETED".equalsIgnoreCase(status)) {
+                    cmbPrescribeAppointment.addItem(apId);
+                }
             }
         }
 
+<<<<<<< HEAD
   
         cmbSelectPatient.removeAllItems();
         cmbSelectPatient.addItem("Select one");
@@ -147,9 +183,21 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
                 String lastName = (String) patientData.get("lastName");
                 
                 cmbSelectPatient.addItem(Id+ " - " + firstName + " " + lastName);
+=======
+        // 3. Carga de Hospitalizaciones
+        if (hospitalizationController != null) {
+            Response hResp = hospitalizationController.getHospitalizations(doctorId);
+            if (hResp != null && hResp.isSuccess() && hResp.getData() != null) {
+                ArrayList<HashMap<String, Object>> hosps = (ArrayList<HashMap<String, Object>>) hResp.getData();
+                for (HashMap<String, Object> h : hosps) {
+                    cmbHospitalization.addItem(String.valueOf(h.get("id")));
+                }
+            }
+>>>>>>> feature/view
         }
         } 
 
+<<<<<<< HEAD
        
         cmbPatientId.removeAllItems();
         cmbPatientId.addItem("Select one");
@@ -167,11 +215,33 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
         
     
     
+=======
+        // 4. Carga de Pacientes
+        if (dataController != null) {
+            Response response = dataController.getAllPatients();
+            if (response != null && response.isSuccess() && response.getData() != null) {
+                ArrayList<HashMap<String, Object>> patientsList = (ArrayList<HashMap<String, Object>>) response.getData();
+                for (HashMap<String, Object> p : patientsList) {
+                    String id = String.valueOf(p.get("id"));
+                    String fName = String.valueOf(p.get("firstName"));
+                    String lName = String.valueOf(p.get("lastName"));
+
+                    cmbSelectPatient.addItem(id + " - " + fName + " " + lName);
+                    cmbPatientId.addItem(id);
+                }
+            }
+        }
+
+        // FORZAR REFRESCO DE LA INTERFAZ
+        cmbPrescribeAppointment.revalidate();
+        cmbPrescribeAppointment.repaint();
+>>>>>>> feature/view
     }
     
     
 
     private void loadAppointmentsTable(boolean pendingOnly) {
+<<<<<<< HEAD
         
         String doctorId = String.valueOf(userData.get("id"));
         Response resp = ac.getDoctorAppointments(doctorId, pendingOnly);
@@ -203,6 +273,26 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
                         break;
                     }
                 }
+=======
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblDoctorView.getModel();
+        model.setRowCount(0);
+
+        // Usamos directamente this.doctorId convertido a String
+        packagee.util.Response response = appointmentController.getDoctorAppointments(String.valueOf(this.doctorId), pendingOnly);
+
+        if (response.isSuccess()) {
+            java.util.ArrayList<java.util.HashMap<String, Object>> appointments
+                    = (java.util.ArrayList<java.util.HashMap<String, Object>>) response.getData();
+
+            for (java.util.HashMap<String, Object> appt : appointments) {
+                model.addRow(new Object[]{
+                    appt.get("id"),
+                    appt.get("datetime"),
+                    appt.get("patientId"), // Muestra el ID o el nombre serializado
+                    appt.get("reason"),
+                    appt.get("status")
+                });
+>>>>>>> feature/view
             }
             
             model.addRow(new Object[]{
@@ -218,7 +308,6 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
         }
     }
 
-    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
@@ -802,87 +891,102 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
     }
 
     private void tblLogoutActionPerformed(java.awt.event.ActionEvent evt) {
-        new LoginView().setVisible(true);
-        this.dispose();
+        packagee.model.storage.StorageHospital storage = packagee.model.storage.StorageHospital.getInstance();
+
+        // ¡VITAL! Desuscribir la vista antes de cerrar sesión
+        storage.removeObserver(this);
+
+        this.dispose(); // Destruye la ventana y libera memoria
+
+        new LoginView(
+                new packagee.controller.LoginController(storage),
+                new packagee.controller.PatientController(storage),
+                new packagee.controller.DoctorController(storage),
+                new packagee.controller.AppointmentController(storage),
+                new packagee.controller.HospitalizationController(storage),
+                new packagee.controller.DataController(storage)
+        ).setVisible(true);
     }
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {
+<<<<<<< HEAD
         new AdminView(userData).setVisible(true);
         doctorController.unregisterObserver(this);
+=======
+        StorageHospital.getInstance().removeObserver(this);
+>>>>>>> feature/view
         this.dispose();
     }
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {
-        // Actualizar doctor
-        DoctorController controller = new DoctorController();
-        String selectedSpec = (String) cmbSpecialty.getSelectedItem();
-        Response response = controller.updateDoctor(
-                String.valueOf(userData.get("id")),
-                txtUsername.getText(), // username
-                txtFirstName.getText(), // firstname
-                txtLastName.getText(), // lastname
-                txtPassword.getText(), // password
-                jTextField10.getText(), // confirm
-                selectedSpec,
-                txtLicenceNumber.getText(), // licenseNumber
-                txtAssignedOffice.getText() // assignedOffice
+        Response response = doctorController.updateDoctor(
+                String.valueOf(doctorId), txtUsername.getText(), txtFirstName.getText(), txtLastName.getText(),
+                txtPassword.getText(), jTextField10.getText(), (String) cmbSpecialty.getSelectedItem(),
+                txtLicenceNumber.getText(), txtAssignedOffice.getText()
         );
-        if (response.isSuccess()) {
-            JOptionPane.showMessageDialog(this, response.getMessage(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            userData = (HashMap<String, Object>) response.getData();
-        } else {
-            JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
+        JOptionPane.showMessageDialog(this, response.getMessage(), response.isSuccess() ? "Éxito" : "Error", response.isSuccess() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
     }
 
     private void btnAcceptAppointmentActionPerformed(java.awt.event.ActionEvent evt) {
-        AppointmentController controller = new AppointmentController();
-        String appointmentId = (String) cmbAcceptAppointment.getSelectedItem();
-        Response response = controller.acceptAppointment(appointmentId, String.valueOf(userData.get("id")));
-        if (response.isSuccess()) {
-            JOptionPane.showMessageDialog(this, response.getMessage(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            loadAppointmentsTable(false);
-            loadComboBoxes();
-        } else {
-            JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        // 1. Validar que realmente haya seleccionado un ID válido
+        if (cmbAcceptAppointment.getSelectedIndex() <= 0) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Please select a valid appointment ID from the list.",
+                    "Warning",
+                    javax.swing.JOptionPane.WARNING_MESSAGE);
+            return; // Detenemos la ejecución aquí
         }
+
+        // 2. Extraer el ID seleccionado
+        String appointmentId = cmbAcceptAppointment.getSelectedItem().toString();
+
+        // 3. Enviar al controlador (MVC puro)
+        packagee.util.Response res = appointmentController.acceptAppointment(appointmentId, String.valueOf(doctorId));
+
+        // 4. Mostrar el resultado al doctor
+        if (res.isSuccess()) {
+            javax.swing.JOptionPane.showMessageDialog(this, res.getMessage(), "Success", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            // Reseteamos el combo a "Select one"
+            cmbAcceptAppointment.setSelectedIndex(0);
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, res.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+        };
     }
 
     private void btnRescheduleActionPerformed(java.awt.event.ActionEvent evt) {
-        // Reagendar cita
-        AppointmentController controller = new AppointmentController();
-        String appointmentId = (String) cmbRescheduleAppointment.getSelectedItem();
-        Response response = controller.rescheduleAppointment(
-                appointmentId, String.valueOf(userData.get("id")),
-                jTextField13.getText(), jTextField14.getText()
-        );
-        if (response.isSuccess()) {
-            JOptionPane.showMessageDialog(this, response.getMessage(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            loadAppointmentsTable(false);
-        } else {
-            JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
+        Response res = appointmentController.rescheduleAppointment((String) cmbRescheduleAppointment.getSelectedItem(), String.valueOf(doctorId), jTextField13.getText(), jTextField14.getText());
+        JOptionPane.showMessageDialog(this, res.getMessage());
     }
 
     private void btnCompleteActionPerformed(java.awt.event.ActionEvent evt) {
-        // Completar cita
-        AppointmentController controller = new AppointmentController();
+        // 1. Validamos que no elija "Select one"
+        if (cmbCompleteAppointment.getSelectedIndex() <= 0) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Please select a valid appointment ID.",
+                    "Warning",
+                    javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // 2. Ejecutamos la acción
         String appointmentId = (String) cmbCompleteAppointment.getSelectedItem();
-        Response response = controller.completeAppointment(appointmentId, String.valueOf(userData.get("id")));
-        if (response.isSuccess()) {
-            JOptionPane.showMessageDialog(this, response.getMessage(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            loadAppointmentsTable(false);
-            loadComboBoxes();
+        packagee.util.Response res = appointmentController.completeAppointment(appointmentId, String.valueOf(doctorId));
+
+        // 3. Mostramos mensaje y limpiamos la interfaz
+        if (res.isSuccess()) {
+            javax.swing.JOptionPane.showMessageDialog(this, res.getMessage(), "Success", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            cmbCompleteAppointment.setSelectedIndex(0); // Reiniciamos el combo a "Select one"
         } else {
-            JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            javax.swing.JOptionPane.showMessageDialog(this, res.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void btnGenerateActionPerformed(java.awt.event.ActionEvent evt) {
-        // Hospitalizar desde cita (jRadioButton6) o aprobar hospitalización (jRadioButton5)
-        HospitalizationController controller = new HospitalizationController();
-        String doctorId = String.valueOf(userData.get("id"));
+        // 1. Convertimos el ID del doctor a String (ya no usamos userData)
+        String currentDoctorId = String.valueOf(this.doctorId);
+
         if (jRadioButton6.isSelected()) {
+<<<<<<< HEAD
             String selectedPatient = (String) cmbPatientId.getSelectedItem();
             // Buscar una cita PENDING del paciente para hospitalizar desde ella
             Response aptsResp = ac.getPatientAppointments(selectedPatient);
@@ -895,45 +999,74 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
                         break;
                     }
                 }
+=======
+            // --- OPCIÓN 1: Hospitalizar desde una Cita ---
+
+            // Revisamos qué fila seleccionó el doctor en la tabla
+            int selectedRow = tblDoctorView.getSelectedRow();
+
+            // Si no seleccionó nada (selectedRow es -1), le avisamos y detenemos la ejecución
+            if (selectedRow == -1) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Por favor, seleccione una cita de la tabla para proceder con la hospitalización.", "Error", javax.swing.JOptionPane.WARNING_MESSAGE);
+                return;
+>>>>>>> feature/view
             }
-            Response response = controller.hospitalizeFromAppointment(
-                    appointmentId, doctorId, jTextField21.getText(),
-                    jTextArea9.getText(), "STANDARD", jTextArea1.getText()
+
+            // Extraemos el ID de la cita que está en la primera columna (índice 0)
+            String appointmentId = tblDoctorView.getValueAt(selectedRow, 0).toString();
+
+            // Obtenemos los textos de tus campos
+            String date = jTextField21.getText();
+            String reason = jTextArea9.getText();
+            String roomType = "STANDARD"; // Nota: Si tienes un ComboBox para esto en DoctorView, cámbialo por tuCombo.getSelectedItem().toString()
+            String observations = jTextArea1.getText();
+
+            // Llamamos al controlador con datos 100% reales
+            packagee.util.Response res = hospitalizationController.hospitalizeFromAppointment(
+                    appointmentId,
+                    currentDoctorId,
+                    date,
+                    reason,
+                    roomType,
+                    observations
             );
-            if (response.isSuccess()) {
-                JOptionPane.showMessageDialog(this, response.getMessage(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                loadComboBoxes();
-            } else {
-                JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+
+            javax.swing.JOptionPane.showMessageDialog(this, res.getMessage());
+
+            // Si la hospitalización fue un éxito, recargamos la tabla para que la cita desaparezca o se actualice a COMPLETED
+            if (res.isSuccess()) {
+                loadAppointmentsTable(true); // O false, dependiendo de cómo quieras refrescar la vista
             }
+
         } else if (jRadioButton5.isSelected()) {
-            String hospId = (String) cmbHospitalization.getSelectedItem();
-            Response response = controller.approveHospitalization(hospId, doctorId);
-            if (response.isSuccess()) {
-                JOptionPane.showMessageDialog(this, response.getMessage(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                loadComboBoxes();
-            } else {
-                JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            // --- OPCIÓN 2: Aprobar una hospitalización solicitada (Desde el ComboBox) ---
+
+            Object selectedItem = cmbHospitalization.getSelectedItem();
+
+            // Validación por si el combo está vacío o en "Seleccionar"
+            if (selectedItem == null || selectedItem.toString().equals("Select one") || selectedItem.toString().trim().isEmpty()) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Por favor, seleccione una solicitud de hospitalización válida.", "Error", javax.swing.JOptionPane.WARNING_MESSAGE);
+                return;
             }
-        } else {
-            JOptionPane.showMessageDialog(this, "Selecciona Requests o Patient ID", "Error", JOptionPane.ERROR_MESSAGE);
+
+            String hospitalizationId = selectedItem.toString();
+
+            packagee.util.Response res = hospitalizationController.approveHospitalization(
+                    hospitalizationId,
+                    currentDoctorId
+            );
+
+            javax.swing.JOptionPane.showMessageDialog(this, res.getMessage());
         }
     }
 
     private void btnCancelHospitalizationActionPerformed(java.awt.event.ActionEvent evt) {
-        // Denegar hospitalización
-        HospitalizationController controller = new HospitalizationController();
-        String hospId = (String) cmbHospitalization.getSelectedItem();
-        Response response = controller.denyHospitalization(hospId, String.valueOf(userData.get("id")));
-        if (response.isSuccess()) {
-            JOptionPane.showMessageDialog(this, response.getMessage(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            loadComboBoxes();
-        } else {
-            JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
+        Response res = hospitalizationController.denyHospitalization((String) cmbHospitalization.getSelectedItem(), String.valueOf(doctorId));
+        JOptionPane.showMessageDialog(this, res.getMessage());
     }
 
     private void btnSearchPatientActionPerformed(java.awt.event.ActionEvent evt) {
+<<<<<<< HEAD
         String selectedPatient = (String) cmbSelectPatient.getSelectedItem();
         if (selectedPatient == null || selectedPatient.isEmpty()) {
         return; 
@@ -985,44 +1118,90 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
         }
     }else {
             JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+=======
+        if (cmbSelectPatient.getSelectedIndex() <= 0) {
+            return;
+        }
+        String patId = ((String) cmbSelectPatient.getSelectedItem()).split(" - ")[0];
+
+        packagee.util.Response res = appointmentController.getPatientAppointments(patId);
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) jTable3.getModel();
+        model.setRowCount(0);
+
+        if (res.isSuccess()) {
+            java.util.ArrayList<java.util.HashMap<String, Object>> appointments
+                    = (java.util.ArrayList<java.util.HashMap<String, Object>>) res.getData();
+
+            for (java.util.HashMap<String, Object> appt : appointments) {
+                model.addRow(new Object[]{
+                    appt.get("id"),
+                    appt.get("datetime"),
+                    appt.get("doctorId"),
+                    appt.get("specialty"),
+                    appt.get("isRequestedByDoctor") != null && (boolean) appt.get("isRequestedByDoctor") ? "Doctor" : "Specialty",
+                    appt.get("status")
+                });
+            }
+>>>>>>> feature/view
         }
     }
 
     private void btnAddMedicationActionPerformed(java.awt.event.ActionEvent evt) {
-        // Agregar medicamento a la tabla temporal
+        if (cmbPrescribeAppointment.getSelectedIndex() <= 0) {
+            JOptionPane.showMessageDialog(this, "Selecciona una cita válida.");
+            return;
+        }
+
         DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-        String appointmentId = (String) cmbPrescribeAppointment.getSelectedItem();
-        String medicationName = jTextField24.getText();
-        String dose = jTextField25.getText();
-        String adminRoute = jTextField26.getText();
-        String duration = jTextField28.getText();
-        String instructions = jTextField29.getText();
-        String frequency = jTextField27.getText();
-        model.addRow(new Object[]{appointmentId, medicationName, dose, adminRoute, duration, instructions, frequency});
+        model.addRow(new Object[]{
+            cmbPrescribeAppointment.getSelectedItem().toString(), // CORREGIDO AQUÍ
+            jTextField24.getText(),
+            jTextField25.getText(),
+            jTextField26.getText(),
+            jTextField28.getText(),
+            jTextField29.getText(),
+            jTextField27.getText()
+        });
     }
 
     private void btnPrescribeActionPerformed(java.awt.event.ActionEvent evt) {
-        // Prescribir el medicamento seleccionado en la tabla
         DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-        int selectedRow = jTable1.getSelectedRow();
-        String appointmentId = (String) model.getValueAt(selectedRow, 0);
-        String medicationName = (String) model.getValueAt(selectedRow, 1);
-        double dose = Double.parseDouble((String) model.getValueAt(selectedRow, 2));
-        String adminRoute = (String) model.getValueAt(selectedRow, 3);
-        int duration = Integer.parseInt((String) model.getValueAt(selectedRow, 4));
-        String instructions = (String) model.getValueAt(selectedRow, 5);
-        int frequency = Integer.parseInt((String) model.getValueAt(selectedRow, 6));
 
-        AppointmentController controller = new AppointmentController();
-        Response response = controller.prescribeMedication(
-                appointmentId, String.valueOf(userData.get("id")),
-                medicationName, dose, adminRoute, duration, instructions, frequency
-        );
-        if (response.isSuccess()) {
-            JOptionPane.showMessageDialog(this, response.getMessage(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            model.removeRow(selectedRow);
-        } else {
-            JOptionPane.showMessageDialog(this, response.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        if (model.getRowCount() == 0) {
+            JOptionPane.showMessageDialog(this, "No hay medicamentos en la lista para prescribir.");
+            return;
+        }
+
+        // Iteramos desde la última fila hacia la primera para poder eliminar filas sin errores de índice
+        for (int i = model.getRowCount() - 1; i >= 0; i--) {
+            try {
+                // Extraer datos de la fila i
+                String apId = String.valueOf(model.getValueAt(i, 0));
+                String medName = String.valueOf(model.getValueAt(i, 1));
+
+                // Conversiones seguras
+                double dose = Double.parseDouble(String.valueOf(model.getValueAt(i, 2)));
+                String route = String.valueOf(model.getValueAt(i, 3));
+                int duration = Integer.parseInt(String.valueOf(model.getValueAt(i, 4)));
+                String instructions = String.valueOf(model.getValueAt(i, 5));
+                int frequency = Integer.parseInt(String.valueOf(model.getValueAt(i, 6)));
+
+                // Enviar al controlador
+                Response res = appointmentController.prescribeMedication(
+                        apId, String.valueOf(doctorId), medName, dose, route, duration, instructions, frequency
+                );
+
+                if (res.isSuccess()) {
+                    model.removeRow(i); // Eliminamos solo si tuvo éxito
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error en fila " + (i + 1) + ": " + res.getMessage());
+                }
+
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Error en los números de la fila " + (i + 1) + ". Revisa la dosis, duración o frecuencia.");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error inesperado en fila " + (i + 1) + ": " + e.getMessage());
+            }
         }
     }
 

@@ -17,16 +17,20 @@ import packagee.util.Response;
  */
 public class LoginController {
 
-    public Response login(String username, String password) {
+    private final StorageHospital storage;
 
+    // Inyección de dependencias
+    public LoginController(StorageHospital storage) {
+        this.storage = storage;
+    }
+
+    public Response login(String username, String password) {
         if (username == null || username.trim().isEmpty()) {
             return new Response(false, "El nombre de usuario no puede estar vacío", null);
         }
         if (password == null || password.trim().isEmpty()) {
             return new Response(false, "La contraseña no puede estar vacía", null);
         }
-
-        StorageHospital storage = StorageHospital.getInstance();
 
         // Verificar administrador
         Administrator admin = storage.getAdmin();
