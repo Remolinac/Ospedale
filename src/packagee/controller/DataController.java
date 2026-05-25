@@ -23,7 +23,7 @@ public class DataController {
 
     private final StorageHospital storage;
 
-    // Inyección de dependencias
+    
     public DataController(StorageHospital storage) {
         this.storage = storage;
     }
@@ -43,11 +43,12 @@ public class DataController {
         }
         return new Response(true, "Doctores obtenidos correctamente", serialized);
     }
+
     public Response getSpecialties() {
-    // Si tus especialidades están en un enum, conviértelas a una lista
-    List<String> specialties = Arrays.asList("GENERAL_MEDICINE", "CARDIOLOGY", "PEDIATRICS", "NEUROLOGY", "TRAUMATOLOGY_ORTHOPEDICS", "GYNECOLOGY_OBSTETRICS", "DERMATOLOGY", "PSYCHIATRY", "ONCOLOGY", "OPHTHALMOLOGY", "INTERNAL_MEDICINE");
-    return new Response(true, "Especialidades obtenidas", specialties);
-}
+        // Si tus especialidades están en un enum, conviértelas a una lista
+        List<String> specialties = Arrays.asList("GENERAL_MEDICINE", "CARDIOLOGY", "PEDIATRICS", "NEUROLOGY", "TRAUMATOLOGY_ORTHOPEDICS", "GYNECOLOGY_OBSTETRICS", "DERMATOLOGY", "PSYCHIATRY", "ONCOLOGY", "OPHTHALMOLOGY", "INTERNAL_MEDICINE");
+        return new Response(true, "Especialidades obtenidas", specialties);
+    }
 
     public Response getAllAppointments() {
         ArrayList<HashMap<String, Object>> serialized = new ArrayList<>();

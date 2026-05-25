@@ -4,7 +4,6 @@
  */
 package packagee.view;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -22,7 +21,6 @@ import packagee.util.Response;
  */
 public class DoctorView extends javax.swing.JFrame implements Observer {
 
-    // 1. Declarar la variable aquí arriba
     private java.util.HashMap<String, Object> userData;
     private int x, y;
     private long doctorId;
@@ -35,7 +33,7 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
 
     public DoctorView(HashMap<String, Object> data, long doctorId, DoctorController dc, AppointmentController ac,
             HospitalizationController hc, DataController datac, boolean isAdmin) {
-        this.userData = data; // 3. Guardarla
+        this.userData = data;
         this.doctorId = doctorId;
         this.doctorController = dc;
         this.appointmentController = ac;
@@ -48,8 +46,6 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
         StorageHospital.getInstance().addObserver(this);
         txtFirstName.setText((String) userData.get("firstname"));
         txtLastName.setText((String) userData.get("lastname"));
-
-        // Cargar datos
         loadComboBoxes();
         loadAppointmentsTable(false);
     }
@@ -91,68 +87,62 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
     }
 
     private void loadComboBoxes() {
-        String doctorId = String.valueOf(this.doctorId);
+        try {
+            String doctorIdStr = String.valueOf(this.doctorId);
+            cmbAcceptAppointment.removeAllItems();
+            cmbAcceptAppointment.addItem("Select one");
+            cmbRescheduleAppointment.removeAllItems();
+            cmbRescheduleAppointment.addItem("Select one");
+            cmbCompleteAppointment.removeAllItems();
+            cmbCompleteAppointment.addItem("Select one");
+            cmbPrescribeAppointment.removeAllItems();
+            cmbPrescribeAppointment.addItem("Select one");
+            cmbHospitalization.removeAllItems();
+            cmbHospitalization.addItem("Select one");
+            cmbSelectPatient.removeAllItems();
+            cmbSelectPatient.addItem("Select one");
+            cmbPatientId.removeAllItems();
+            cmbPatientId.addItem("Select one");
 
-        // 1. Limpieza total de los componentes
-        cmbAcceptAppointment.removeAllItems();
-        cmbAcceptAppointment.addItem("Select one");
-        cmbRescheduleAppointment.removeAllItems();
-        cmbRescheduleAppointment.addItem("Select one");
-        cmbCompleteAppointment.removeAllItems();
-        cmbCompleteAppointment.addItem("Select one");
-        cmbPrescribeAppointment.removeAllItems();
-        cmbPrescribeAppointment.addItem("Select one");
-        cmbHospitalization.removeAllItems();
-        cmbHospitalization.addItem("Select one");
-        cmbSelectPatient.removeAllItems();
-        cmbSelectPatient.addItem("Select one");
-        cmbPatientId.removeAllItems();
-        cmbPatientId.addItem("Select one");
+            packagee.util.Response resp = appointmentController.getDoctorAppointments(doctorIdStr, false);
+            if (resp != null && resp.isSuccess() && resp.getData() != null) {
+                java.util.ArrayList<java.util.HashMap<String, Object>> apts
+                        = (java.util.ArrayList<java.util.HashMap<String, Object>>) resp.getData();
 
-        // 2. Carga de Citas
-        Response resp = appointmentController.getDoctorAppointments(doctorId, false);
-        if (resp != null && resp.isSuccess() && resp.getData() != null) {
-            ArrayList<HashMap<String, Object>> apts = (ArrayList<HashMap<String, Object>>) resp.getData();
+                for (java.util.HashMap<String, Object> ap : apts) {
+                    String apId = String.valueOf(ap.get("id"));
+                    String rawStatus = String.valueOf(ap.get("status"));
 
-            for (HashMap<String, Object> ap : apts) {
-                String apId = String.valueOf(ap.get("id"));
-                String status = String.valueOf(ap.get("status"));
+                    String status = rawStatus != null ? rawStatus.trim().toUpperCase() : "";
 
-    
-                if ("REQUESTED".equalsIgnoreCase(status)) {
-                    cmbAcceptAppointment.addItem(apId);
-     
-                }
-
-                // Citas en ACCEPTED: Se pueden completar
-                if ("PENDING".equalsIgnoreCase(status)) {
-                    cmbCompleteAppointment.addItem(apId);
-                }
-
-                // Citas en COMPLETED: Se pueden prescribir (Aquí es donde debes asegurarte que el backend acepte este estado)
-                if ("COMPLETED".equalsIgnoreCase(status)) {
-                    cmbPrescribeAppointment.addItem(apId);
+                    if (status.equals("REQUESTED")) {
+                        cmbAcceptAppointment.addItem(apId);
+                        cmbRescheduleAppointment.addItem(apId);
+                    } else if (status.equals("PENDING") || status.equals("ACCEPTED")) { // Por si acaso usas ACCEPTED
+                        cmbCompleteAppointment.addItem(apId);
+                        cmbRescheduleAppointment.addItem(apId);
+                    } else if (status.equals("COMPLETED")) {
+                        cmbPrescribeAppointment.addItem(apId);
+                    } else {
+                        System.out.println(" -> Cita Cancelada o con Estado Desconocido. No se muestra en combos.");
+                    }
                 }
             }
-        }
 
-        // 3. Carga de Hospitalizaciones
-        if (hospitalizationController != null) {
-            Response hResp = hospitalizationController.getHospitalizations(doctorId);
+            packagee.util.Response hResp = hospitalizationController.getHospitalizations(doctorIdStr);
             if (hResp != null && hResp.isSuccess() && hResp.getData() != null) {
-                ArrayList<HashMap<String, Object>> hosps = (ArrayList<HashMap<String, Object>>) hResp.getData();
-                for (HashMap<String, Object> h : hosps) {
+                java.util.ArrayList<java.util.HashMap<String, Object>> hosps
+                        = (java.util.ArrayList<java.util.HashMap<String, Object>>) hResp.getData();
+                for (java.util.HashMap<String, Object> h : hosps) {
                     cmbHospitalization.addItem(String.valueOf(h.get("id")));
                 }
             }
-        }
 
-        // 4. Carga de Pacientes
-        if (dataController != null) {
-            Response response = dataController.getAllPatients();
-            if (response != null && response.isSuccess() && response.getData() != null) {
-                ArrayList<HashMap<String, Object>> patientsList = (ArrayList<HashMap<String, Object>>) response.getData();
-                for (HashMap<String, Object> p : patientsList) {
+            packagee.util.Response pResp = dataController.getAllPatients();
+            if (pResp != null && pResp.isSuccess() && pResp.getData() != null) {
+                java.util.ArrayList<java.util.HashMap<String, Object>> patientsList
+                        = (java.util.ArrayList<java.util.HashMap<String, Object>>) pResp.getData();
+                for (java.util.HashMap<String, Object> p : patientsList) {
                     String id = String.valueOf(p.get("id"));
                     String fName = String.valueOf(p.get("firstName"));
                     String lName = String.valueOf(p.get("lastName"));
@@ -161,18 +151,17 @@ public class DoctorView extends javax.swing.JFrame implements Observer {
                     cmbPatientId.addItem(id);
                 }
             }
-        }
 
-        // FORZAR REFRESCO DE LA INTERFAZ
-        cmbPrescribeAppointment.revalidate();
-        cmbPrescribeAppointment.repaint();
+        } catch (Exception e) {
+            System.out.println("ERROR FATAL AL CARGAR COMBOBOXES:");
+            e.printStackTrace();
+        }
     }
 
     private void loadAppointmentsTable(boolean pendingOnly) {
         javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblDoctorView.getModel();
         model.setRowCount(0);
 
-        // Usamos directamente this.doctorId convertido a String
         packagee.util.Response response = appointmentController.getDoctorAppointments(String.valueOf(this.doctorId), pendingOnly);
 
         if (response.isSuccess()) {

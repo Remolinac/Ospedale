@@ -16,9 +16,9 @@ import packagee.util.Validator;
  * @author sierr
  */
 public class PatientController {
+
     private final StorageHospital storage;
 
-    // Inyección de dependencias
     public PatientController(StorageHospital storage) {
         this.storage = storage;
     }
@@ -28,13 +28,27 @@ public class PatientController {
             String email, String phone, String birthdate,
             String gender, String address) {
 
-        if (!Validator.isValidId(id)) return new Response(false, "El ID debe tener exactamente 12 dígitos y ser mayor que 0", null);
-        if (username == null || username.trim().isEmpty()) return new Response(false, "El nombre de usuario no puede estar vacío", null);
-        if (!Validator.isValidPassword(password, confirm)) return new Response(false, "La contraseña no puede estar vacía o las contraseñas no coinciden", null);
-        if (!Validator.isValidEmail(email)) return new Response(false, "El email no tiene el formato correcto", null);
-        if (!Validator.isValidPhone(phone)) return new Response(false, "El teléfono debe tener exactamente 10 dígitos", null);
-        if (!Validator.isValidDate(birthdate)) return new Response(false, "La fecha de nacimiento no es válida, use el formato AAAA-MM-DD", null);
-        if (address == null || address.trim().isEmpty()) return new Response(false, "La dirección no puede estar vacía", null);
+        if (!Validator.isValidId(id)) {
+            return new Response(false, "El ID debe tener exactamente 12 dígitos y ser mayor que 0", null);
+        }
+        if (username == null || username.trim().isEmpty()) {
+            return new Response(false, "El nombre de usuario no puede estar vacío", null);
+        }
+        if (!Validator.isValidPassword(password, confirm)) {
+            return new Response(false, "La contraseña no puede estar vacía o las contraseñas no coinciden", null);
+        }
+        if (!Validator.isValidEmail(email)) {
+            return new Response(false, "El email no tiene el formato correcto", null);
+        }
+        if (!Validator.isValidPhone(phone)) {
+            return new Response(false, "El teléfono debe tener exactamente 10 dígitos", null);
+        }
+        if (!Validator.isValidDate(birthdate)) {
+            return new Response(false, "La fecha de nacimiento no es válida, use el formato AAAA-MM-DD", null);
+        }
+        if (address == null || address.trim().isEmpty()) {
+            return new Response(false, "La dirección no puede estar vacía", null);
+        }
 
         if (storage.getPatient(Long.parseLong(id)) != null) {
             return new Response(false, "Ya existe un paciente con ese ID", null);
@@ -58,13 +72,27 @@ public class PatientController {
             String email, String phone, String birthdate,
             String gender, String address) {
 
-        if (!Validator.isValidId(id)) return new Response(false, "El ID debe tener exactamente 12 dígitos y ser mayor que 0", null);
-        if (username == null || username.trim().isEmpty()) return new Response(false, "El nombre de usuario no puede estar vacío", null);
-        if (!Validator.isValidPassword(password, confirm)) return new Response(false, "La contraseña no puede estar vacía o las contraseñas no coinciden", null);
-        if (!Validator.isValidEmail(email)) return new Response(false, "El email no tiene el formato correcto", null);
-        if (!Validator.isValidPhone(phone)) return new Response(false, "El teléfono debe tener exactamente 10 dígitos", null);
-        if (!Validator.isValidDate(birthdate)) return new Response(false, "La fecha de nacimiento no es válida, use el formato AAAA-MM-DD", null);
-        if (address == null || address.trim().isEmpty()) return new Response(false, "La dirección no puede estar vacía", null);
+        if (!Validator.isValidId(id)) {
+            return new Response(false, "El ID debe tener exactamente 12 dígitos y ser mayor que 0", null);
+        }
+        if (username == null || username.trim().isEmpty()) {
+            return new Response(false, "El nombre de usuario no puede estar vacío", null);
+        }
+        if (!Validator.isValidPassword(password, confirm)) {
+            return new Response(false, "La contraseña no puede estar vacía o las contraseñas no coinciden", null);
+        }
+        if (!Validator.isValidEmail(email)) {
+            return new Response(false, "El email no tiene el formato correcto", null);
+        }
+        if (!Validator.isValidPhone(phone)) {
+            return new Response(false, "El teléfono debe tener exactamente 10 dígitos", null);
+        }
+        if (!Validator.isValidDate(birthdate)) {
+            return new Response(false, "La fecha de nacimiento no es válida, use el formato AAAA-MM-DD", null);
+        }
+        if (address == null || address.trim().isEmpty()) {
+            return new Response(false, "La dirección no puede estar vacía", null);
+        }
 
         Patient patient = storage.getPatient(Long.parseLong(id));
         if (patient == null) {
@@ -88,9 +116,9 @@ public class PatientController {
 
         return new Response(true, "Paciente actualizado correctamente", patient.serialize());
     }
+
     public HashMap<String, Object> getPacienteData(String patientId) {
-    // Aquí el controlador actúa como intermediario puro
-    Patient p = storage.getPatient(Long.parseLong(patientId));
-    return (p != null) ? p.serialize() : new HashMap<>();
-}
+        Patient p = storage.getPatient(Long.parseLong(patientId));
+        return (p != null) ? p.serialize() : new HashMap<>();
+    }
 }

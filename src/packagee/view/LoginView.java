@@ -4,27 +4,14 @@
  */
 package packagee.view;
 
-import com.formdev.flatlaf.FlatDarkLaf;
-import java.awt.Color;
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.JOptionPane;
-import javax.swing.UIManager;
 import packagee.controller.AppointmentController;
 import packagee.controller.DataController;
 import packagee.controller.DoctorController;
 import packagee.controller.HospitalizationController;
 import packagee.controller.LoginController;
 import packagee.controller.PatientController;
-import packagee.model.Administrator;
-import packagee.model.Appointment;
-import packagee.model.Doctor;
-import packagee.model.Hospitalization;
-import packagee.model.Patient;
-import packagee.model.User;
-import packagee.model.storage.StorageHospital;
 import packagee.util.Response;
 
 /**
@@ -412,32 +399,25 @@ public class LoginView extends javax.swing.JFrame {
     }//GEN-LAST:event_btnXActionPerformed
 
     private void btnEnterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnterActionPerformed
-        // Cero validaciones en la vista
         Response response = loginController.login(txtUsername.getText(), txtPassword.getText());
 
         if (response.isSuccess()) {
             HashMap<String, Object> data = (HashMap<String, Object>) response.getData();
             String role = (String) data.get("role");
             long id = ((Number) data.get("id")).longValue();
-
-            // Navegación inyectando dependencias
             if (role.equals("ADMIN")) {
                 new AdminView(id, doctorController, patientController, appointmentController, hospitalizationController, dataController).setVisible(true);
             } else if (role.equals("DOCTOR")) {
-                // Justo donde vas a abrir el DoctorView en el LoginView, pon esto:
 
-// 1. Extraemos los datos del Response (asumiendo que tu variable de respuesta se llama 'response' o similar)
                 java.util.HashMap<String, Object> userData = (java.util.HashMap<String, Object>) response.getData();
-
-// 2. Llamamos a DoctorView con los 7 parámetros exactos
                 new DoctorView(
-                        userData, // 1. Los datos del usuario (HashMap)
-                        id, // 2. El ID
-                        doctorController, // 3. Controlador
-                        appointmentController, // 4. Controlador
-                        hospitalizationController, // 5. Controlador
-                        dataController, // 6. Controlador
-                        false // 7. false porque no es Admin
+                        userData,
+                        id,
+                        doctorController,
+                        appointmentController,
+                        hospitalizationController,
+                        dataController,
+                        false
                 ).setVisible(true);
             } else if (role.equals("PATIENT")) {
                 new PatientView(id, patientController, appointmentController, hospitalizationController, dataController, false).setVisible(true);

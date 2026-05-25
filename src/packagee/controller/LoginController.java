@@ -19,7 +19,6 @@ public class LoginController {
 
     private final StorageHospital storage;
 
-    // Inyección de dependencias
     public LoginController(StorageHospital storage) {
         this.storage = storage;
     }

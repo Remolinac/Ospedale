@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import javax.swing.table.DefaultTableModel;
 import packagee.controller.AppointmentController;
 import packagee.controller.DataController;
 import packagee.controller.HospitalizationController;
@@ -14,7 +13,6 @@ import packagee.model.storage.StorageHospital;
 import packagee.util.Observer;
 import packagee.util.Response;
 import packagee.controller.*;
-import packagee.model.User;
 
 public class PatientView extends javax.swing.JFrame implements Observer {
 
@@ -39,29 +37,23 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         this.isAdmin = isAdmin;
 
         initComponents();
-        btnBack.setVisible(true); // Forzamos a que NetBeans lo muestre
-
-        // Le quitamos cualquier acción vieja que tenga arrastrando
+        btnBack.setVisible(true); 
         for (java.awt.event.ActionListener al : btnBack.getActionListeners()) {
             btnBack.removeActionListener(al);
         }
 
-        // Le damos la acción correcta para volver al AdminView
+       
         btnBack.addActionListener(e -> {
-            this.dispose(); // Cierra el PatientView
-
-            // 1. Obtenemos el ID del administrador desde el storage
+            this.dispose(); 
             packagee.model.storage.StorageHospital storage = packagee.model.storage.StorageHospital.getInstance();
             long currentAdminId = storage.getAdmin().getId();
-
-            // 2. Abrimos el AdminView respetando su constructor al pie de la letra
             new packagee.view.AdminView(
-                    currentAdminId, // 1. long adminId
-                    doctorController, // 2. DoctorController dc
-                    patientController, // 3. PatientController pc
-                    appointmentController, // 4. AppointmentController ac
-                    hospitalizationController, // 5. HospitalizationController hc
-                    dataController // 6. DataController datac
+                    currentAdminId,
+                    doctorController,
+                    patientController,
+                    appointmentController, 
+                    hospitalizationController, 
+                    dataController
             ).setVisible(true);
         });
         this.setBackground(new Color(0, 0, 0, 0));
@@ -69,13 +61,10 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         this.setLocationRelativeTo(null);
         StorageHospital.getInstance().addObserver(this);
         tabbedpanePatientView.addChangeListener(e -> {
-        if (tabbedpanePatientView.getSelectedIndex() == 1) { 
-        // 1. Recibimos directamente el HashMap (ya no usamos Response)
-        java.util.HashMap<String, Object> data = patientController.getPacienteData(String.valueOf(patientId));
-        
-        // 2. Se lo pasamos a tu método para que pinte los datos
-        cargarDatosPaciente(data);
-    }
+            if (tabbedpanePatientView.getSelectedIndex() == 1) {
+                java.util.HashMap<String, Object> data = patientController.getPacienteData(String.valueOf(patientId));
+                cargarDatosPaciente(data);
+            }
         });
 
         cargarComboDoctores();
@@ -84,7 +73,6 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         cargarTablaAppointments();
         cargarComboAppointmentsCancel();
     }
-
 
     @Override
     public void update(String event) {
@@ -120,8 +108,6 @@ public class PatientView extends javax.swing.JFrame implements Observer {
     private void cargarComboEspecialidades() {
         cmbSelectDoctor.removeAllItems();
         cmbSelectDoctor.addItem("Select one"); // O "Select a specialty"
-
-        // Llamamos al controlador, manteniendo el MVC
         Response res = dataController.getSpecialties();
 
         if (res.isSuccess()) {
@@ -297,8 +283,6 @@ public class PatientView extends javax.swing.JFrame implements Observer {
         lblPatientView.setFont(new java.awt.Font("Yu Gothic UI", 0, 14));
         lblPatientView.setText("PATIENT VIEW");
 
-        // CORRECCIÓN: Quitamos el botón Back porque un paciente no debe ir al AdminView. 
-        // Solo necesita el Logout. Lo dejo invisible por si acaso no quieres borrar el código.
         btnBack.setFont(new java.awt.Font("Yu Gothic UI", 0, 18));
         btnBack.setText("Back");
         btnBack.setVisible(false);
@@ -333,7 +317,7 @@ public class PatientView extends javax.swing.JFrame implements Observer {
             cargarComboAppointmentsCancel();
         });
 
-        // CORRECCIÓN: El Logout ahora instancia el LoginView inyectándole los controladores
+      
         btnLogout.setFont(new java.awt.Font("Yu Gothic UI", 0, 18));
         btnLogout.setText("Logout");
         btnLogout.addActionListener(e -> {
